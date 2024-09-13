@@ -1,47 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; 
+import React, { useEffect, useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserContext , UserProvider } from './UserProvider';
+import { UserContext } from './UserProvider'; // Ensure UserProvider wraps the component tree
 
 const Login = () => {
-    const Navigate = useNavigate();
-    // const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [wrongCredentials, setWrongCredentials] = React.useState(false);
-    // const [userId, setUserId] = React.useState(0);
     const { setUserId } = useContext(UserContext);
-    
+    const navigate = useNavigate(); // Use lowercase for navigate
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [wrongCredentials, setWrongCredentials] = useState(false);
+
+    useEffect(() => {
+        // Fetch userId from localStorage and set it in the context if it exists
+        const storedUserId = localStorage.getItem('userId');
+        if (storedUserId) {
+            setUserId(storedUserId);
+        }
+    }, [setUserId]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            axios.post('http://localhost:8000/user/login', { email, password }).then((response) => {
-                // console.log(response.data);
-                if (response.data.message === "Login Successfull") {
-                    console.log(response.data);
-                    // setIsLoggedIn(true);
-                    Cookies.set('token', response.data.token);
-                    setWrongCredentials(false);
-                    console.log(response.data);
-                    setUserId(response.data.user_id);
-                    Navigate('/dashboard');
-                }
-                else if(response.data.message === "Wrong username or password"){
-                    // setIsLoggedIn(false);
-                    setWrongCredentials(true);
-                    console.log(response.data);
-                }
-            }).catch((error) => {
-                console.log(error);
-                // setIsLoggedIn(false);
-            });
+            const response = await axios.post('http://localhost:8000/user/login', { email, password });
+            if (response.data.message === "Login Successfull") {
+                // Set token in cookies and userId in localStorage
+                Cookies.set('token', response.data.token);
+                Cookies.set('userId', response.data.user_id);
+                setWrongCredentials(false);
+                navigate('/dashboard'); 
+            } else if (response.data.message === "Wrong username or password") {
+                setWrongCredentials(true);
+            }
         } catch (error) {
             console.error(error);
+            setWrongCredentials(true);
         }
-        // console.log("Logged in successfully");
     };
 
     return (
@@ -51,11 +45,9 @@ const Login = () => {
                     <h1 className="text-3xl font-extrabold mb-2 text-gray-800">Login</h1>
                     <p className="text-gray-600 text-sm">Enter your credentials to login</p>
                 </div>
-                {/* <hr /> */}
                 {wrongCredentials && (
                     <p className="text-sm text-center text-red-600">Wrong username or password</p>
                 )}
-                
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="flex flex-col space-y-2">
                         <label htmlFor="email" className="text-sm font-semibold text-gray-700">Email</label>

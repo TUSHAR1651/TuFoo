@@ -2,14 +2,14 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { UserContext } from './UserProvider';
 import { Navigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const CreateForm = () => {
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
     const [questions, setQuestions] = useState([]);
     const [error, setError] = useState('');
-    const { userId } = useContext(UserContext);
-
+    const userId = Cookies.get('userId');
     const addQuestion = () => {
         setQuestions([...questions, { type: 'short-answer', questionText: '', options: [] }]);
     };
@@ -83,51 +83,61 @@ const CreateForm = () => {
             questions,
             userId
         };
-        const success = false;
+
+        var success = false;
         try {
             const formId = await createForm(formData);
             console.log(`Form created with ID: ${formId}`);
-            success = true;
+            window.location.href = '/dashboard';
+            // success = true;
         } catch (err) {
             setError('Failed to create form. Please try again.');
             console.error(err);
         }
-
-        if (success) {
-            setFormName('');
-            setFormDescription('');
-            setQuestions([]);
-            setError('');
-            Navigate('/dashboard');
-        }
+        
+        // if (success) {
+        //     setFormName('');
+        //     setFormDescription('');
+        //     setQuestions([]);
+        //     setError('');
+        //     Navigate('/dashboard');
+        // }
     };
 
     async function createForm(formData) {
+        if (userId === null) {
+            // setError('User ID is null');
+            console.log("User id is null");
+            throw new Error('User ID is null');
+        } 
         try {
             const response = await axios.post('http://localhost:8000/form/create_form', formData);
             if (response.data.message === "Form Created Successfully") {
                 const formId = response.data.formId;
-                console.log(response.data);
-                console.log(`Form created with ID: ${formId}`);
-                try {
+                // console.log(response.data);
+                // console.log(`Form created with ID: ${formId}`);
+                // try {
                     await axios.post('http://localhost:8000/form/add_form_to_user', {
                         form_id: formId,
                         userId: userId
                     });
-                }
-                catch (err) {
-                    console.error('Error adding form to user:', err);
-                }
-                try {
+                // }
+                // catch (err) {
+
+                //     console.error('Error adding form to user:', err);
+                   
+                // }
+                // try {
                     await axios.post('http://localhost:8000/question/create_question', {
                         questions: formData.questions,
                         form_id: formId
                     });
-                } catch (err) {
-                    console.error('Error creating questions:', err);
-                    throw err;
+            // } 
+                // catch (err) {
+                    // console.error('Error creating questions:', err);
+                    // throw err;
 
-                }
+                // }
                 return formId;
             } else {
                 console.error('Error creating form:', response.data.message);

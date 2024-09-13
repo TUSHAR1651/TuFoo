@@ -26,8 +26,8 @@ FormRoute.post("/create_form", (req, res) => {
 
 FormRoute.post("/add_form_to_user", (req, res) => {
   const { form_id, userId } = req.body;
-  // console.log(req.body);
-  // console.log(form_id, userId);
+  console.log(req.body);
+  console.log(form_id, userId);
   db.query(
     "INSERT INTO user_forms (user_id, form_id) VALUES (?, ?)",
     [userId, form_id],
@@ -42,6 +42,22 @@ FormRoute.post("/add_form_to_user", (req, res) => {
       }
     }
   );
+});
+
+
+
+FormRoute.get(`/get_forms`, (req, res) => {
+  console.log("hi");
+  console.log(req.query);
+  const userId = req.query.userId;
+  db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) where user_id = ? " , [userId] , (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      res.send(result);
+    }
+  });
 });
 
 module.exports = FormRoute;
