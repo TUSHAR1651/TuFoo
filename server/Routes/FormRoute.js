@@ -1,0 +1,47 @@
+const express = require("express");
+const db = require("../utils/db");
+const FormRoute = express.Router();
+
+FormRoute.post("/create_form", (req, res) => {
+  const { formName, formDescription } = req.body;
+  // console.log(req.body);
+  // console.log(formName, formDescription);
+  db.query(
+    "INSERT INTO forms (form_name, description) VALUES (?, ?)",
+    [formName, formDescription],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        //   console.log(result);
+        res.status(200).json({
+          message: "Form Created Successfully",
+          formId : result.insertId
+        });
+      }
+    }
+  );
+
+});
+
+FormRoute.post("/add_form_to_user", (req, res) => {
+  const { form_id, userId } = req.body;
+  // console.log(req.body);
+  // console.log(form_id, userId);
+  db.query(
+    "INSERT INTO user_forms (user_id, form_id) VALUES (?, ?)",
+    [userId, form_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        //   console.log(result);
+        res.status(200).json({
+          message: "Form Added Successfully",
+        });
+      }
+    }
+  );
+});
+
+module.exports = FormRoute;
