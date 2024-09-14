@@ -33,7 +33,7 @@ FormRoute.post("/add_form_to_user", (req, res) => {
     [userId, form_id],
     (err, result) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
       } else {
         //   console.log(result);
         res.status(200).json({
@@ -54,10 +54,27 @@ FormRoute.get(`/get_forms`, (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
+      // console.log(result);
       res.send(result);
     }
   });
 });
+
+FormRoute.get(`/get_form/:formId`, (req, res) => {
+  const userId = req.query.userId;
+  // console.log(req.query);
+  // console.log(req.params);
+  const formId = req.params.formId;
+  db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) left join questions using(form_id) left join options using(question_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      // console.log(result);
+      res.send(result);
+    }
+  });
+
+});
+
 
 module.exports = FormRoute;

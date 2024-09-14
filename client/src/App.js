@@ -7,6 +7,7 @@ import CreateForm from "./components/CreateForm";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { UserProvider } from "./components/UserProvider";
+import EditForm from "./components/EditForm";
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="" element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/createForm" element={<CreateForm />} />
+            <Route path="/dashboard/createForm" element={<CreateForm />} />
+            <Route path="/dashboard/form/:formId" element={<EditForm/>} />
         </Route>
       </Routes>
       </BrowserRouter>

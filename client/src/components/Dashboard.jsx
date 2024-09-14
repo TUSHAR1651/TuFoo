@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const getForms = () => {
     axios
-      .get('http://localhost:8000/form/get_forms', { params: { userId } }) // Correctly pass userId as a query parameter
+      .get('http://localhost:8000/form/get_forms', { params: { userId } }) 
       .then((response) => {
         setForms(response.data);
       })

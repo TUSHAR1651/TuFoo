@@ -4,6 +4,7 @@ const QuestionRoute = express.Router();
 
 
 function getQuestionTypeId(type) {
+  // console.log(type);
   return new Promise((resolve, reject) => {
     db.query(
       "SELECT question_type_id FROM question_types WHERE type_name = ?",
@@ -13,10 +14,11 @@ function getQuestionTypeId(type) {
           return reject(err);
         }
         if (result.length > 0) {
-          const id = result[0].id;
+          console.log(result[0]);
+          const id = result[0].question_type_id;
           return resolve(id);
         } else {
-          return resolve(-1); // Indicate that the type was not found
+          return resolve(-1); 
         }
       }
     );
@@ -33,8 +35,9 @@ QuestionRoute.post("/create_question", async (req, res) => {
       const { type , questionText } = questions[i];
         // if (text == "") continue;
         
-     
+      console.log(type);
       const id1 = await getQuestionTypeId(type);
+      console.log("Question Type Id:", id1);
       let question_id = -1;
       if (id1 !== -1) {
         await new Promise((resolve, reject) => {
