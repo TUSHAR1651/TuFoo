@@ -62,14 +62,16 @@ FormRoute.get(`/get_forms`, (req, res) => {
 
 FormRoute.get(`/get_form/:formId`, (req, res) => {
   const userId = req.query.userId;
+  // const formId = req.query.formId;
   // console.log(req.query);
   // console.log(req.params);
   const formId = req.params.formId;
-  db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) left join questions using(form_id) left join options using(question_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
+  
+  db.query("SELECT * FROM forms join user_forms using(form_id) join users using(user_id) join questions using(form_id) join options using(question_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      // console.log(result);
+      console.log(result);
       res.send(result);
     }
   });
