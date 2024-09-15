@@ -4,6 +4,7 @@ if(process.env.NODE_ENV !== "production") {
 const QuestionRoute = require("./Routes/QuestionRoutes");
 const FormRoute = require("./Routes/FormRoute");
 const UserRoute = require("./Routes/UserRoute");
+const OptionsRoute = require("./Routes/OptionsRoute");
 const cors = require("cors");
 const express = require("express");
 const db = require("./utils/db");
@@ -23,6 +24,7 @@ app.use(
 app.use("/form" , FormRoute);
 app.use("/user", UserRoute);
 app.use("/question", QuestionRoute);
+app.use("/options", OptionsRoute);
 
 
 

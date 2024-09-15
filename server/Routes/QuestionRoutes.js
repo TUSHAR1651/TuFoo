@@ -24,6 +24,18 @@ function getQuestionTypeId(type) {
     );
   });
 }
+QuestionRoute.get("/get_questions", (req, res) => {
+  const form_id = req.query.form_id;
+  db.query("SELECT * FROM questions left join question_types using(question_type_id) WHERE form_id = ?" , [form_id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      res.send(result);
+    }
+  });
+});
+
 
 QuestionRoute.post("/create_question", async (req, res) => {
   const questions = req.body.questions;

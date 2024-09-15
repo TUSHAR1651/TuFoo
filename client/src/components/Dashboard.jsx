@@ -20,6 +20,7 @@ const Dashboard = () => {
     axios
       .get('http://localhost:8000/form/get_forms', { params: { userId } }) 
       .then((response) => {
+        // console.log('Forms:', response.data);
         setForms(response.data);
       })
       .catch((error) => {
@@ -51,6 +52,7 @@ const Dashboard = () => {
           <div className="mt-8">
             <ul className="divide-y divide-gray-200">
               {forms.map((form, index) => (
+                <a key={index} onClick={() => getForm(form.form_id)}>
                 <li key={index} className="py-6 px-4 bg-gray-50 rounded-lg shadow-sm mb-4">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
@@ -65,7 +67,8 @@ const Dashboard = () => {
                       <p className="text-gray-600 mt-1">{form.description}</p>
                     </div>
                   </div>
-                </li>
+                  </li>
+                </a>
               ))}
             </ul>
           </div>

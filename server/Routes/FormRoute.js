@@ -67,14 +67,20 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
   // console.log(req.params);
   const formId = req.params.formId;
   
-  db.query("SELECT * FROM forms join user_forms using(form_id) join users using(user_id) join questions using(form_id) join options using(question_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
+  db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
-      res.send(result);
+      // console.log("hi");
+      // console.log(result);
+      if(result.length > 0){
+        res.send(result);
+      }
+      else res.send({message : "Form not found"});
     }
   });
+
+  
 
 });
 
