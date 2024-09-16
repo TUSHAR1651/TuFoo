@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const EditForm = () => {
@@ -16,87 +16,67 @@ const EditForm = () => {
 
     useEffect(() => {
         getForm();
-    }, []);
+    }, [formId]);
 
     const getForm = async () => {
-        console.log('formId:', formId);
-        console.log('userId:', userId);
         try {
-            const response = await axios.get(`http://localhost:8000/form/get_form/${formId}`, {
+            const formResponse = await axios.get(`http://localhost:8000/form/get_form/${formId}`, {
                 params: { userId }
             });
-            if (response.data.message === "Form not found") {
-                window.location.href = '/dashboard';
-            }
-            // console.log("hi");
-            const formData = response.data;
-            // console.log('Response:', response.data);
-            // console.log('Form Data:', formData);
-            // console.log('formName'  , formData[0].form_name);
-            if (formData.length > 0) {
-                setFormName(formData[0].form_name);
-                setFormDescription(formData[0].description);
-                
+
+            if (formResponse.data.message === "Form not found") {
+                navigate('/dashboard');
+                return;
             }
 
-            
-        } catch (error) {
+            const formData = formResponse.data[0] || {};
+            setFormName(formData.form_name || '');
+            setFormDescription(formData.description || '');
 
-            console.error("Error fetching form:", error);
-            setError('Failed to fetch form data.');
-        }
-
-        try {
-            const response = await axios.get('http://localhost:8000/question/get_questions', {
+            const questionsResponse = await axios.get('http://localhost:8000/question/get_questions', {
                 params: { form_id: formId }
             });
-            const questionsData = response.data;
-            console.log('Questions Data:', questionsData);
 
-            // Use Promise.all to handle async operations inside map
-            const questions = await Promise.all(questionsData.map(async (question) => {
+            const questionsData = questionsResponse.data || [];
+
+            const questionsWithOptions = await Promise.all(questionsData.map(async (question) => {
                 try {
                     const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
                         params: { question_id: question.question_id }
                     });
-                    const options = optionsResponse.data;
+                    const options = optionsResponse.data || [];
 
                     return {
-                        type: question.type_name,
-                        questionText: question.question_text,
-                        options: options.length > 0 ? options.map((option) => option.option_text) : []
+                        question_id: question.question_id,
+                        type: question.type_name || 'short-answer',
+                        questionText: question.question_text || '',
+                        options: options.map(option => ({
+                            option_text: option.option_text || '',
+                            option_id: option.option_id
+                        }))
                     };
                 } catch (optionsError) {
                     console.error('Error fetching options:', optionsError);
-                    // Return question with empty options if there's an error
                     return {
-                        type: question.type_name,
-                        questionText: question.question_text,
+                        question_id: question.question_id,
+                        type: question.type_name || 'short-answer',
+                        questionText: question.question_text || '',
                         options: []
                     };
                 }
             }));
 
-            console.log('Questions after processing:', questions);
-            setQuestions(questions);
+            setQuestions(questionsWithOptions);
         } catch (error) {
-            console.error('Error fetching questions:', error);
+            console.error("Error fetching form:", error);
             setError('Failed to fetch form data.');
         }
-
-        // if (error === "Failed to fetch form data") {
-        //     window.href("/dashboard");
-        // }
     };
 
     const handleQuestionTypeChange = useCallback((index, type) => {
         const updatedQuestions = [...questions];
         updatedQuestions[index].type = type;
-        if (type === 'mcq' || type === 'checkboxes') {
-            updatedQuestions[index].options = updatedQuestions[index].options.length ? updatedQuestions[index].options : [''];
-        } else {
-            updatedQuestions[index].options = [];
-        }
+        updatedQuestions[index].options = type === 'mcq' || type === 'checkboxes' ? (updatedQuestions[index].options.length ? updatedQuestions[index].options : ['']) : [];
         setQuestions(updatedQuestions);
     }, [questions]);
 
@@ -117,13 +97,13 @@ const EditForm = () => {
 
     const handleOptionChange = (questionIndex, optionIndex, text) => {
         const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].options[optionIndex] = text;
+        updatedQuestions[questionIndex].options[optionIndex] = { ...updatedQuestions[questionIndex].options[optionIndex], option_text: text };
         setQuestions(updatedQuestions);
     };
 
     const addOption = (questionIndex) => {
         const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].options.push('');
+        updatedQuestions[questionIndex].options.push({ option_text: '' });
         setQuestions(updatedQuestions);
     };
 
@@ -168,14 +148,17 @@ const EditForm = () => {
         try {
             const response = await axios.put(`http://localhost:8000/form/update_form/${formId}`, formData);
             if (response.data.message === "Form Updated Successfully") {
-                navigate('/dashboard');
-            } else {
-                setError('Failed to update form. Please try again.');
+                console.log("Hi");
+                // navigate('/dashboard');
+            }   
+            else {
+                // console.log()
+                setError('Failed to update form');
             }
-        } catch (error) {
-            console.error('Error updating form:', error);
-            setError('Failed to update form. Please try again.');
+        }catch {
+            setError("Failed to update form");
         }
+        
     };
 
     return (
@@ -256,7 +239,7 @@ const EditForm = () => {
                                                 type="text"
                                                 className="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ease-in-out"
                                                 placeholder="Enter option"
-                                                value={option}
+                                                value={option.option_text}
                                                 onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
                                                 required
                                             />

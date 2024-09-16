@@ -102,5 +102,16 @@ QuestionRoute.post("/create_question", async (req, res) => {
   }
 });
 
+QuestionRoute.delete(`/delete_questions/:form_id`, (req, res) => {
+  const questions = req.body;
+  const { question_id } = req.body;
+  db.query("DELETE FROM questions WHERE form_id = ?", [form_id], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(message = "Questions deleted successfully");
+    }
+  });
+});
 
 module.exports = QuestionRoute;

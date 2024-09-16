@@ -24,9 +24,29 @@ FormRoute.post("/create_form", (req, res) => {
 
 });
 
+FormRoute.put(`/update_form/:formId`, (req, res) => {
+  const {formName, formDescription } = req.body;
+  const formId = req.params.formId;
+  // console.log(req.body);
+  db.query(
+    "UPDATE forms SET form_name = ?, description = ? WHERE form_id = ?",
+    [formName, formDescription, formId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        //   console.log(result);
+        res.status(200).json({
+          message: "Form Updated Successfully",
+        });
+      }
+    }
+  );
+});
+
 FormRoute.post("/add_form_to_user", (req, res) => {
   const { form_id, userId } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
   console.log(form_id, userId);
   db.query(
     "INSERT INTO user_forms (user_id, form_id) VALUES (?, ?)",
