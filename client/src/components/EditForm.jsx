@@ -40,11 +40,15 @@ const EditForm = () => {
             const questionsData = questionsResponse.data || [];
 
             const questionsWithOptions = await Promise.all(questionsData.map(async (question) => {
+                // console.log(question);
                 try {
                     const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
                         params: { question_id: question.question_id }
                     });
+                    // console.log(optionsResponse);
                     const options = optionsResponse.data || [];
+
+                    // console.log(options);
 
                     return {
                         question_id: question.question_id,
@@ -65,7 +69,7 @@ const EditForm = () => {
                     };
                 }
             }));
-
+            // console.log(questionsWithOptions);
             setQuestions(questionsWithOptions);
         } catch (error) {
             console.error("Error fetching form:", error);
@@ -81,12 +85,23 @@ const EditForm = () => {
     }, [questions]);
 
     const addQuestion = () => {
+
         setQuestions([...questions, { type: 'short-answer', questionText: '', options: [] }]);
+
+
     };
 
-    const removeQuestion = (index) => {
+    const removeQuestion = (index , question_id) => {
+
         const updatedQuestions = questions.filter((_, i) => i !== index);
         setQuestions(updatedQuestions);
+
+        // console.log(1 , question_id);
+
+        if (question_id) {
+            const response = axios.delete(`http://localhost:8000/question/delete_question/${question_id}`);
+            
+        }
     };
 
     const handleQuestionTextChange = (index, text) => {
@@ -107,10 +122,16 @@ const EditForm = () => {
         setQuestions(updatedQuestions);
     };
 
-    const removeOption = (questionIndex, optionIndex) => {
+    const removeOption = (questionIndex, optionIndex, option_id) => {
+        // console.log(option_id);
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].options.splice(optionIndex, 1);
         setQuestions(updatedQuestions);
+
+        if (option_id) {
+            const response = axios.delete(`http://localhost:8000/options/delete_option/${option_id}`);
+        }
+
     };
 
     const handleSubmit = async (e) => {
@@ -148,7 +169,7 @@ const EditForm = () => {
         try {
             const response = await axios.put(`http://localhost:8000/form/update_form/${formId}`, formData);
             if (response.data.message === "Form Updated Successfully") {
-                console.log("Hi");
+                // console.log("Hi");
                 // navigate('/dashboard');
             }   
             else {
@@ -158,23 +179,45 @@ const EditForm = () => {
         }catch {
             setError("Failed to update form");
         }
+
+        try {
+            // console.log(questions);
+            await axios.put(`http://localhost:8000/question/update_question/${formId}`, {
+                questions
+            });
+
+            // navigate('/dashboard');
+            
+
+        } catch (err) {
+            console.error('Error updating questions:', err);
+            setError("Failed to update questions");
+
+        }
+        if(error) {
+            return;
+        }
+
+        window.location.href = '/dashboard';
+
+
         
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
-            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-[1.02]">
-                <div className="px-8 py-6 bg-gradient-to-r from-indigo-600 to-purple-600">
-                    <h2 className="text-3xl font-extrabold text-white">Edit Form</h2>
+        <div className="min-h-screen bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 py-12 px-4 sm:px-6 lg:px-8">
+            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="px-8 py-6 bg-gradient-to-r from-blue-500 to-purple-600">
+                    <h2 className="text-3xl font-bold text-white">Edit Form</h2>
                 </div>
-                <div className="p-8">
-                    {error && <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">{error}</div>}
+                <div className="p-8 space-y-6">
+                    {error && <div className="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">{error}</div>}
 
-                    <div className="mb-6">
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Form Name</label>
                         <input
                             type="text"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
                             value={formName}
                             onChange={(e) => setFormName(e.target.value)}
                             placeholder="Enter form name"
@@ -182,10 +225,10 @@ const EditForm = () => {
                         />
                     </div>
 
-                    <div className="mb-6">
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Form Description</label>
                         <textarea
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
                             value={formDescription}
                             onChange={(e) => setFormDescription(e.target.value)}
                             placeholder="Enter form description"
@@ -194,24 +237,24 @@ const EditForm = () => {
                     </div>
 
                     {questions.length === 0 && (
-                        <p className="mb-4 text-gray-600 italic">No questions added yet. Click 'Add Question' to start.</p>
+                        <p className="text-gray-600 italic">No questions added yet. Click 'Add Question' to start.</p>
                     )}
 
                     {questions.map((question, index) => (
-                        <div key={index} className="mb-8 bg-gray-50 rounded-lg p-6 shadow-md transition-all duration-300 ease-in-out hover:shadow-lg">
+                        <div key={index} className="bg-gray-50 rounded-lg p-6 shadow-md hover:shadow-lg transition duration-300">
                             <div className="flex justify-between items-center mb-4">
-                                <label className="block text-lg font-semibold text-gray-800">Question {index + 1}</label>
+                                <label className="text-lg font-semibold text-gray-800">Question {index + 1}</label>
                                 <button
                                     type="button"
-                                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 ease-in-out"
-                                    onClick={() => removeQuestion(index)}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+                                    onClick={() => removeQuestion(index, question.question_id)}
                                 >
                                     Remove
                                 </button>
                             </div>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
                                 placeholder="Enter your question"
                                 value={question.questionText}
                                 onChange={(e) => handleQuestionTextChange(index, e.target.value)}
@@ -220,7 +263,7 @@ const EditForm = () => {
 
                             <label className="block text-sm font-medium text-gray-700 mt-4 mb-2">Question Type</label>
                             <select
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
                                 value={question.type}
                                 onChange={(e) => handleQuestionTypeChange(index, e.target.value)}
                             >
@@ -231,13 +274,13 @@ const EditForm = () => {
                             </select>
 
                             {(question.type === 'mcq' || question.type === 'checkboxes') && (
-                                <div className="mt-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                                <div className="mt-4 space-y-2">
+                                    <label className="block text-sm font-medium text-gray-700">Options</label>
                                     {question.options.map((option, optionIndex) => (
-                                        <div key={optionIndex} className="flex items-center mb-2">
+                                        <div key={optionIndex} className="flex items-center space-x-2">
                                             <input
                                                 type="text"
-                                                className="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                                                className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
                                                 placeholder="Enter option"
                                                 value={option.option_text}
                                                 onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
@@ -245,8 +288,8 @@ const EditForm = () => {
                                             />
                                             <button
                                                 type="button"
-                                                className="ml-2 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 ease-in-out"
-                                                onClick={() => removeOption(index, optionIndex)}
+                                                className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+                                                onClick={() => removeOption(index, optionIndex, option.option_id)}
                                             >
                                                 Remove
                                             </button>
@@ -254,7 +297,7 @@ const EditForm = () => {
                                     ))}
                                     <button
                                         type="button"
-                                        className="mt-2 py-2 px-4 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 ease-in-out"
+                                        className="mt-2 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out"
                                         onClick={() => addOption(index)}
                                     >
                                         Add Option
@@ -267,7 +310,7 @@ const EditForm = () => {
                     <div className="flex justify-between mt-8">
                         <button
                             type="button"
-                            className="py-2 px-6 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 ease-in-out transform hover:scale-105"
+                            className="py-2 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out transform hover:scale-105"
                             onClick={addQuestion}
                         >
                             Add Question
@@ -275,7 +318,7 @@ const EditForm = () => {
 
                         <button
                             type="submit"
-                            className="py-2 px-6 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 ease-in-out transform hover:scale-105"
+                            className="py-2 px-6 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out transform hover:scale-105"
                         >
                             Update Form
                         </button>

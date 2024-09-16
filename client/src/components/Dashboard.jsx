@@ -6,9 +6,7 @@ import Cookies from 'js-cookie';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [forms, setForms] = useState([]);
-
   const userId = Cookies.get('userId');
-  console.log('userId:', userId);
 
   useEffect(() => {
     if (userId) {
@@ -18,9 +16,8 @@ const Dashboard = () => {
 
   const getForms = () => {
     axios
-      .get('http://localhost:8000/form/get_forms', { params: { userId } }) 
+      .get('http://localhost:8000/form/get_forms', { params: { userId } })
       .then((response) => {
-        // console.log('Forms:', response.data);
         setForms(response.data);
       })
       .catch((error) => {
@@ -28,53 +25,80 @@ const Dashboard = () => {
       });
   };
 
-  const getForm = (formId) => {
+  const handleFormClick = (formId) => {
     navigate(`/dashboard/form/${formId}`);
   }
 
-  const createForm = () => {
+  const handleCreateForm = () => {
     navigate('/dashboard/createForm');
   };
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-green-300 via-blue-400 to-purple-500 p-8">
-      <div className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-3xl">
-        <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-6">Dashboard</h1>
-        <h2 className="text-2xl font-semibold text-center text-gray-700 mb-8">Forms</h2>
-        <button
-          className="w-full py-3 px-5 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-lg shadow-lg hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300"
-          onClick={createForm}
-        >
-          Create New Form
-        </button>
+  const handleDeleteForm = (e, formId) => {
+    e.stopPropagation();
+    // Add your delete logic here
+    console.log(`Deleting form with id: ${formId}`);
 
-        {forms.length > 0 ? (
-          <div className="mt-8">
-            <ul className="divide-y divide-gray-200">
-              {forms.map((form, index) => (
-                <a key={index} onClick={() => getForm(form.form_id)}>
-                <li key={index} className="py-6 px-4 bg-gray-50 rounded-lg shadow-sm mb-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <img
-                        className="h-10 w-10 rounded-full ring-2 ring-blue-300"
-                        src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
-                        alt="Workflow"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900">{form.name}</h3>
-                      <p className="text-gray-600 mt-1">{form.description}</p>
-                    </div>
-                  </div>
-                  </li>
-                </a>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p className="text-center text-gray-600 mt-6">No forms found</p>
-        )}
+    axios.delete(`http://localhost:8000/form/delete_form/${formId}`, {
+      params: { userId }
+    })
+    // After successful deletion, you might want to refresh the forms list
+    .then(() => {
+      getForms();
+    })
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+            Your Dashboard
+          </h1>
+          <p className="mt-3 max-w-md mx-auto text-base text-gray-600 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+            Manage your forms and create new ones with ease.
+          </p>
+        </div>
+
+        <div className="mb-10">
+          <button
+            onClick={handleCreateForm}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Create New Form
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {forms.length > 0 ? (
+            forms.map((form) => (
+              <div
+                key={form.form_id}
+                onClick={() => handleFormClick(form.form_id)}
+                className="bg-white overflow-hidden shadow-md rounded-lg hover:shadow-lg transition duration-300 cursor-pointer"
+              >
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">{form.name}</h3>
+                  <p className="mt-1 max-w-2xl text-sm text-gray-500">{form.description}</p>
+                </div>
+                <div className="px-4 py-4 sm:px-6 flex justify-between items-center bg-gray-50">
+                  <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                    View details
+                  </span>
+                  <button
+                    onClick={(e) => handleDeleteForm(e, form.form_id)}
+                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center text-gray-500 py-12">
+              <p className="text-xl">No forms found. Create your first form!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

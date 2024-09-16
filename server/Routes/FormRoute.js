@@ -67,8 +67,8 @@ FormRoute.post("/add_form_to_user", (req, res) => {
 
 
 FormRoute.get(`/get_forms`, (req, res) => {
-  console.log("hi");
-  console.log(req.query);
+  // console.log("hi");
+  // console.log(req.query);
   const userId = req.query.userId;
   db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) where user_id = ? " , [userId] , (err, result) => {
     if (err) {
@@ -100,8 +100,35 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
     }
   });
 
-  
+});
 
+FormRoute.delete("/delete_form/:formId", (req, res) => {
+  const { formId } = req.params;
+  db.query("Delete options from options join questions using(question_id) where form_id = ?", [formId], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      db.query("Delete questions from questions where form_id = ?", [formId], (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          db.query("Delete from user_forms where form_id = ?", [formId], (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              db.query("Delete from forms where form_id = ?", [formId], (err, result) => {
+                if (err) {
+                  console.log(err);
+                } else {
+                  res.send(message = "Form deleted successfully");
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
 });
 
 
