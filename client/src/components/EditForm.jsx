@@ -8,7 +8,8 @@ const EditForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const formId = location.pathname.split('/').pop();
-
+    console.log(location.pathname.split('/'));
+    console.log("A" , formId);
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
     const [questions, setQuestions] = useState([]);

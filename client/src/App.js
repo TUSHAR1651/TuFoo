@@ -7,6 +7,7 @@ import CreateForm from "./components/CreateForm";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { UserProvider } from "./components/UserProvider";
+import Form from "./components/Form";
 import EditForm from "./components/EditForm";
 
 function App() {
@@ -20,7 +21,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/createForm" element={<CreateForm />} />
             <Route path="/dashboard/form/:formId" element={<EditForm/>} />
-        </Route>
+          </Route>
+          <Route path = "/dashboard/form/:formId/view" element={<Form/>} />
       </Routes>
       </BrowserRouter>
     </UserProvider>

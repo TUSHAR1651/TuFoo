@@ -30,7 +30,7 @@ QuestionRoute.get("/get_questions", (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
+      // console.log(result);
       res.send(result);
     }
   });

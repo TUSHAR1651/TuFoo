@@ -80,6 +80,21 @@ FormRoute.get(`/get_forms`, (req, res) => {
   });
 });
 
+FormRoute.get(`/get_form_view/:formId` , (req , res) => {
+  const formId = req.params.formId;
+  db.query("SELECT * FROM forms where form_id = ?" , [formId] , (err , result) => {
+    if(err) {
+      console.log(err);
+    }
+    else {
+      if(result.length > 0)
+        res.send(result);
+      else res.send({message : "Form not found"});
+    }
+  })
+
+})
+
 FormRoute.get(`/get_form/:formId`, (req, res) => {
   const userId = req.query.userId;
   // const formId = req.query.formId;
@@ -92,7 +107,7 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
       console.log(err);
     } else {
       // console.log("hi");
-      // console.log(result);
+      console.log(result);
       if(result.length > 0){
         res.send(result);
       }
