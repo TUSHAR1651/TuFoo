@@ -101,13 +101,13 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
   // console.log(req.query);
   // console.log(req.params);
   const formId = req.params.formId;
-  
+  console.log(userId);
   db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
     if (err) {
       console.log(err);
     } else {
       // console.log("hi");
-      console.log(result);
+      // console.log(result);
       if(result.length > 0){
         res.send(result);
       }

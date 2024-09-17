@@ -1,60 +1,84 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { IoArrowBack } from 'react-icons/io5';
+import Cookies from 'js-cookie';
 
 const Response = () => {
+    const userId = Cookies.get('userId');
     const form_id = window.location.pathname.split('/')[3];
-    // console.log(formId);
+    // console.log("formId" , form_id )
     const [questions, setQuestions] = useState([]);
-    const [answers, setAnswers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [formName, setFormName] = useState('Form Responses');
 
     useEffect(() => {
         getQuestions();
     }, []);
 
-    const getQuestions = () => {
-        setIsLoading(true);
-        setError(null);
-        axios
-            .get(`http://localhost:8000/question/get_questions`, { params: { form_id } })
-          .then((response) => {
-            console.log(response.data);
-            setQuestions(response.data);
-          })
-          .catch((error) => {
-            console.error("Error fetching questions:", error);
-            setError("Failed to load questions. Please try again.");
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-        
+    const getQuestions = async () => {
+        try {
+            const questionsResponse = await axios.get(`http://localhost:8000/question/get_questions`, { params: { form_id } });
+            const questionsData = questionsResponse.data;
+
+            const questionsWithAnswers = await Promise.all(
+                questionsData.map(async (question) => {
+                    const answerResponse = await axios.get(`http://localhost:8000/response/get_responses`, { params: { question_id: question.question_id } });
+                    return { ...question, answers: answerResponse.data };
+                })
+            );
+
+            setQuestions(questionsWithAnswers);
+            const formNameResponse = await axios.get(`http://localhost:8000/form/get_form/${form_id}`, {params: { userId} });
+            console.log(formNameResponse);
+            setFormName(formNameResponse.data[0].form_name);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
     };
-    
-    
-    // const getAnswers = () => {
-        
-    //     axios
-    //       .get(`http://localhost:8000/form/get_answers/${formId}`)
-    //       .then((response) => {
-    //         // console.log(response.data);
-    //         setAnswers(response.data);
-    //       })
-    //       .catch((error) => {
-    //         console.error("Error fetching answers:", error);
-    //         setError("Failed to load answers. Please try again.");
-    //       })
-    //       .finally(() => {
-    //         setIsLoading(false);
-    //       });
-        
-    // };
-  return (
-    <div>
-      
-    </div>
-  )
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+            <div className="max-w-4xl mx-auto">
+                <header className="mb-12">
+                    <h1 className="text-4xl font-extrabold text-gray-800 mb-2">{formName}</h1>
+                    <p className="text-gray-600">Review all responses for this form</p>
+                </header>
+
+                <div className="space-y-8">
+                    {questions.map((question, qIndex) => (
+                        <div key={question.question_id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div className="bg-indigo-600 px-6 py-4">
+                                <h2 className="text-xl font-semibold text-white">
+                                    Question {qIndex + 1}
+                                </h2>
+                            </div>
+                            <div className="p-6">
+                                <p className="text-gray-800 font-medium mb-4">{question.question_text}</p>
+                                {question.answers && question.answers.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {question.answers.map((answer, aIndex) => (
+                                            <li key={aIndex} className="bg-gray-50 rounded-lg p-4 text-gray-700">
+                                                {answer.answer_text}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-gray-500 italic">No responses yet</p>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <button
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="mt-12 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+                >
+                    <IoArrowBack className="mr-2" />
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    );
 }
 
-export default Response
+export default Response;

@@ -100,10 +100,8 @@ const Dashboard = () => {
             <div className="col-span-full text-center py-12">
               <p className="text-xl text-gray-500">Loading forms...</p>
             </div>
-          ) : forms.length > 0 ? (
-              
-
-forms.map((form) => (
+          ) : forms.length > 0 ?
+            (forms.map((form) => (
           <div
             key={form.form_id}
             className="bg-white overflow-hidden shadow-sm rounded-lg hover:shadow-md transition-all duration-300 flex flex-col"

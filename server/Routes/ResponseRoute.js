@@ -37,6 +37,16 @@ ResponseRoute.post("/create_response", (req, res) => {
     res.send(message = "Response created successfully");
 })
 
-
+ResponseRoute.get("/get_responses", (req, res) => {
+    const question_id = req.query.question_id;
+    db.query("SELECT * FROM answers WHERE question_id = ?", [question_id], (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(result);
+            res.send(result);
+        }
+    });
+})
 
 module.exports = ResponseRoute
