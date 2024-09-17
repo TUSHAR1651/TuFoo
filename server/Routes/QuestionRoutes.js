@@ -25,7 +25,9 @@ function getQuestionTypeId(type) {
   });
 }
 QuestionRoute.get("/get_questions", (req, res) => {
+  // console.log(req.query);
   const form_id = req.query.form_id;
+  // console.log(form_id);
   db.query("SELECT * FROM questions left join question_types using(question_type_id) WHERE form_id = ?" , [form_id], (err, result) => {
     if (err) {
       console.log(err);

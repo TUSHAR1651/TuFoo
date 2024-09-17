@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { FaLink, FaEdit, FaChartBar, FaTrash } from 'react-icons/fa';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [forms, setForms] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const userId = Cookies.get('userId');
 
   useEffect(() => {
@@ -15,36 +18,54 @@ const Dashboard = () => {
   }, [userId]);
 
   const getForms = () => {
+    setIsLoading(true);
+    setError(null);
     axios
       .get('http://localhost:8000/form/get_forms', { params: { userId } })
       .then((response) => {
+        console.log(response.data);
         setForms(response.data);
       })
       .catch((error) => {
         console.error("Error fetching forms:", error);
+        setError("Failed to load forms. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
+    
   };
 
   const handleFormClick = (formId) => {
     navigate(`/dashboard/form/${formId}`);
   }
 
+  const handleLinkClicked = (formId) => {
+    navigate(`/dashboard/form/${formId}/view`)
+  }
+
   const handleCreateForm = () => {
     navigate('/dashboard/createForm');
   };
 
+  const handleResponseClicked = (formId) => {
+    navigate(`/dashboard/response/${formId}`);
+  }
+
   const handleDeleteForm = (e, formId) => {
     e.stopPropagation();
-    // Add your delete logic here
-    console.log(`Deleting form with id: ${formId}`);
-
-    axios.delete(`http://localhost:8000/form/delete_form/${formId}`, {
-      params: { userId }
-    })
-    // After successful deletion, you might want to refresh the forms list
-    .then(() => {
-      getForms();
-    })
+    if (window.confirm("Are you sure you want to delete this form?")) {
+      axios.delete(`http://localhost:8000/form/delete_form/${formId}`, {
+        params: { userId }
+      })
+        .then(() => {
+          getForms();
+        })
+        .catch((error) => {
+          console.error("Error deleting form:", error);
+          setError("Failed to delete form. Please try again.");
+        });
+    }
   };
 
   return (
@@ -68,31 +89,66 @@ const Dashboard = () => {
           </button>
         </div>
 
+        {error && (
+          <div className="text-center py-4">
+            <p className="text-red-500">{error}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {forms.length > 0 ? (
-            forms.map((form) => (
-              <div
-                key={form.form_id}
-                onClick={() => handleFormClick(form.form_id)}
-                className="bg-white overflow-hidden shadow-md rounded-lg hover:shadow-lg transition duration-300 cursor-pointer"
+          {isLoading ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-xl text-gray-500">Loading forms...</p>
+            </div>
+          ) : forms.length > 0 ? (
+              
+
+forms.map((form) => (
+          <div
+            key={form.form_id}
+            className="bg-white overflow-hidden shadow-sm rounded-lg hover:shadow-md transition-all duration-300 flex flex-col"
+          >
+            <div
+              className="p-6 flex-grow cursor-pointer"
+              // onClick={() => handleFormClick(form.form_id)}
+            >
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{form.form_name}</h3>
+              <p className="text-sm text-gray-600">{form.description}</p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex items-center justify-between">
+              <button
+                onClick={() => handleLinkClicked(form.form_id)}
+                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-150 ease-in-out flex items-center"
               >
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">{form.name}</h3>
-                  <p className="mt-1 max-w-2xl text-sm text-gray-500">{form.description}</p>
-                </div>
-                <div className="px-4 py-4 sm:px-6 flex justify-between items-center bg-gray-50">
-                  <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                    View details
-                  </span>
-                  <button
-                    onClick={(e) => handleDeleteForm(e, form.form_id)}
-                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  >
-                    Delete
-                  </button>
-                </div>
+                <FaLink className="mr-2" />
+                Form Link
+              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleFormClick(form.form_id)}
+                  className="p-2 text-gray-600 hover:text-blue-600 transition-colors duration-150 ease-in-out"
+                  title="Edit Form"
+                >
+                  <FaEdit />
+                </button>
+                <button
+                  onClick={() => handleResponseClicked(form.form_id)}
+                  className="p-2 text-gray-600 hover:text-green-600 transition-colors duration-150 ease-in-out"
+                  title="View Responses"
+                >
+                  <FaChartBar />
+                </button>
+                <button
+                  onClick={(e) => handleDeleteForm(e, form.form_id)}
+                  className="p-2 text-gray-600 hover:text-red-600 transition-colors duration-150 ease-in-out"
+                  title="Delete Form"
+                >
+                  <FaTrash />
+                </button>
               </div>
-            ))
+            </div>
+          </div>
+          ))
           ) : (
             <div className="col-span-full text-center text-gray-500 py-12">
               <p className="text-xl">No forms found. Create your first form!</p>

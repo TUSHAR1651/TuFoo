@@ -3,6 +3,7 @@ import axios from 'axios';
 import { UserContext } from './UserProvider';
 import { Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import Modal from 'react-modal';
 
 const CreateForm = () => {
     const [formName, setFormName] = useState('');
@@ -10,6 +11,17 @@ const CreateForm = () => {
     const [questions, setQuestions] = useState([]);
     const [error, setError] = useState('');
     const userId = Cookies.get('userId');
+    const [modalIsopen, setModalIsOpen] = useState(false);
+    
+
+    const openModal = () => {
+        setModalIsOpen(true);
+    }
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    }
+
     const addQuestion = () => {
         setQuestions([...questions, { type: 'short-answer', questionText: '', options: [] }]);
     };
@@ -51,6 +63,7 @@ const CreateForm = () => {
         updatedQuestions[questionIndex].options.splice(optionIndex, 1);
         setQuestions(updatedQuestions);
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -88,13 +101,16 @@ const CreateForm = () => {
         try {
             const formId = await createForm(formData);
             console.log(`Form created with ID: ${formId}`);
+            // setModalIsOpen(true);
             window.location.href = '/dashboard';
             // success = true;
         } catch (err) {
             setError('Failed to create form. Please try again.');
             console.error(err);
         }
+
         
+        // Modal();
         // if (success) {
         //     setFormName('');
         //     setFormDescription('');
@@ -103,6 +119,8 @@ const CreateForm = () => {
         //     Navigate('/dashboard');
         // }
     };
+
+
 
     async function createForm(formData) {
         if (userId === null) {
@@ -148,6 +166,7 @@ const CreateForm = () => {
             throw error; // Re-throw error to be caught in handleSubmit
         }
 
+        
         
     }
 
@@ -274,6 +293,10 @@ const CreateForm = () => {
                     {error && <p className="text-red-600 mt-4">{error}</p>}
                 </div>
             </form>
+            <div>
+                <Modal isOpen={modalIsopen} onClose={closeModal} />
+
+            </div>
         </div>
     );
 };

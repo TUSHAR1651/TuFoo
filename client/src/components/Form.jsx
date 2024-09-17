@@ -23,7 +23,7 @@ const Form = () => {
     // console.log("hi");
     if (formResponse.data.message === "Form not found") {
       console.log("A");
-      // navigate('/dashboard');
+      window.location.href = '/dashboard';
       return;
     }
     // console.log(formResponse.data);
@@ -103,14 +103,19 @@ const Form = () => {
     
     if(answers.length !== questions.length){
       setError("Please answer all the questions");
+      console.log(error);
       return;
     }
+    
     const response = await axios.post('http://localhost:8000/response/create_response', {
       answers
     });
     // console.log(response);
 
-    window.location.href('/formSubmitted');
+    // if (response.data.message === "Response created successfully") {
+      // navigate(`/form/${formId}/submitted`);
+      window.location.href = `/submitted/${formId}`;
+    // }
   }
 
   return (
@@ -178,6 +183,13 @@ const Form = () => {
               Submit Response
             </button>
           </div>
+
+          {error && (
+            <div className="text-red-600 text-center mt-4">
+              {error}
+            </div>
+          )}
+
         </div>
       </div>
     </div>
