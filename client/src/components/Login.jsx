@@ -25,6 +25,7 @@ const Login = () => {
             const response = await axios.post('http://localhost:8000/user/login', { email, password });
             if (response.data.message === "Login Successfull") {
                 // Set token in cookies and userId in localStorage
+                console.log(response.data);
                 Cookies.set('token', response.data.token);
                 Cookies.set('userId', response.data.user_id);
                 setWrongCredentials(false);

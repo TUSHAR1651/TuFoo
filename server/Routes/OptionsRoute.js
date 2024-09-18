@@ -4,7 +4,7 @@ const OptionsRoute = express.Router();
 
 OptionsRoute.get("/get_options", (req, res) => {
     const question_id = req.query.question_id;
-    
+    console.log(req.query);
     db.query("SELECT * FROM options WHERE question_id = ?" , [question_id], (err, result) => {
         if (err) {
             console.log(err);
@@ -34,7 +34,7 @@ OptionsRoute.delete("/delete_options", (req, res) => {
 
 OptionsRoute.delete("/delete_option/:option_id", (req, res) => {
     const { option_id } = req.params;
-    db.query("DELETE FROM options WHERE option_id = ?", [option_id], (err, result) => {
+    db.query("DELETE FROM options WHERE id = ?", [option_id], (err, result) => {
         if (err) {
             console.log(err);
         } else {

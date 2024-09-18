@@ -44,7 +44,7 @@ const EditForm = () => {
                 // console.log(question);
                 try {
                     const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
-                        params: { question_id: question.question_id }
+                        params: { question_id: question.id }
                     });
                     // console.log(optionsResponse);
                     const options = optionsResponse.data || [];

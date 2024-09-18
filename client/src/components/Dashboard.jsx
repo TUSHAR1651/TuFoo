@@ -21,7 +21,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
     axios
-      .get('http://localhost:8000/form/get_forms', { params: { userId } })
+      .get('http://localhost:8000/form/get_forms', { params: { id : userId } })
       .then((response) => {
         console.log(response.data);
         setForms(response.data);
@@ -56,7 +56,7 @@ const Dashboard = () => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this form?")) {
       axios.delete(`http://localhost:8000/form/delete_form/${formId}`, {
-        params: { userId }
+        params: { id : userId }
       })
         .then(() => {
           getForms();

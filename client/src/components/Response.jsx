@@ -21,7 +21,7 @@ const Response = () => {
 
             const questionsWithAnswers = await Promise.all(
                 questionsData.map(async (question) => {
-                    const answerResponse = await axios.get(`http://localhost:8000/response/get_responses`, { params: { question_id: question.question_id } });
+                    const answerResponse = await axios.get(`http://localhost:8000/response/get_responses`, { params: { question_id: question.id } });
                     return { ...question, answers: answerResponse.data };
                 })
             );

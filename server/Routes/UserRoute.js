@@ -37,14 +37,14 @@ UserRoute.post("/login" , (req , res) => {
             res.send({err: err});
         }
         if (result.length > 0) {
-            console.log(result[0]);
-            const id = result[0].user_id;
+            // console.log(result[0]);
+            const id = result[0].id;
             const token = jwt.sign({id}, "jwtkey", {
                 expiresIn: "1d"
             });
-            console.log(id);
+            // console.log(id);
             // console.log(result);
-            res.cookie("token" , token, { httpOnly: false });
+            // res.cookie("token" , token, { httpOnly: false });
             res.send({message : "Login Successfull", token :token , user_id : id});
             
         } else {

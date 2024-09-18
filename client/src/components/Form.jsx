@@ -1,11 +1,9 @@
-import React, { useState , useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
-
 const Form = () => {
   const location = useLocation();
-  // pop 2 times
   const path = location.pathname.split('/');
   path.pop();
   const formId = path.pop();
@@ -18,105 +16,107 @@ const Form = () => {
   useEffect(() => {
     getForm();
   }, []);
+
   const getForm = async () => {
-    const formResponse = await axios.get(`http://localhost:8000/form/get_form_view/${formId}`);
-    // console.log("hi");
-    if (formResponse.data.message === "Form not found") {
-      console.log("A");
-      window.location.href = '/dashboard';
-      return;
-    }
-    // console.log(formResponse.data);
-    const formData = formResponse.data[0] || {};
-    setFormName(formData.form_name || '');
-    setFormDescription(formData.description || '');
-    
-    const questionsResponse = await axios.get('http://localhost:8000/question/get_questions', {
-      params: { form_id: formId }
-    });
-
-    const questionsData = questionsResponse.data || [];
-
-    const questionsWithOptions = await Promise.all(questionsData.map(async (question) => {
-      // console.log(question);
-      try {
-        const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
-          params: { question_id: question.question_id }
-        });
-        // console.log(optionsResponse);
-        const options = optionsResponse.data || [];
-
-        // console.log(options);
-
-        return {
-          question_id: question.question_id,
-          type: question.type_name || 'short-answer',
-          questionText: question.question_text || '',
-          options: options.map(option => ({
-            option_text: option.option_text || '',
-            option_id: option.option_id
-          }))
-        };
-      } catch (err) {
-        console.error(err);
-        return null;
+    try {
+      const formResponse = await axios.get(`http://localhost:8000/form/get_form_view/${formId}`);
+      if (formResponse.data.message === "Form not found") {
+        window.location.href = '/dashboard';
+        return;
       }
-    }));
-    setQuestions(questionsWithOptions);
-    // console.log(questionsWithOptions);
-  }
 
- const handleAnswerTextChange = (questionIndex, text) => {
-   const updateAnswers = [...answers];
-   
+      const formData = formResponse.data[0] || {};
+      setFormName(formData.form_name || '');
+      setFormDescription(formData.description || '');
+
+      const questionsResponse = await axios.get('http://localhost:8000/question/get_questions', {
+        params: { form_id: formId }
+      });
+
+      const questionsData = questionsResponse.data || [];
+
+      const questionsWithOptions = await Promise.all(questionsData.map(async (question) => {
+        try {
+          const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
+            params: { question_id: question.id }
+          });
+          const options = optionsResponse.data || [];
+          return {
+            question_id: question.id,
+            type: question.type_name || 'short-answer',
+            questionText: question.question_text || '',
+            options: options.map(option => ({
+              option_text: option.option_text || '',
+              option_id: option.option_id
+            }))
+          };
+        } catch (err) {
+          console.error(err);
+          return null;
+        }
+      }));
+
+      setQuestions(questionsWithOptions);
+    } catch (error) {
+      console.error('Error fetching form data:', error);
+      setError('Error fetching form data');
+    }
+  };
+
+  const handleAnswerTextChange = (questionIndex, text) => {
+    const updateAnswers = [...answers];
     updateAnswers[questionIndex] = {
       text: text,
       question_id: questions[questionIndex].question_id
     };
     setAnswers(updateAnswers);
-
   };
 
-  const handleOptionChange = (questionIndex, optionText, text , questions_type) => {
+  const handleOptionChange = (questionIndex, optionText, isChecked, questionType) => {
     const updateAnswers = [...answers];
-    if(questions_type === "mcq"){
+    if (questionType === "mcq") {
       updateAnswers[questionIndex] = {
         text: optionText,
         question_id: questions[questionIndex].question_id
       };
-    }
-    else{
+    } else {
       if (!updateAnswers[questionIndex]) {
-          updateAnswers[questionIndex] = {
-          text: [], 
+        updateAnswers[questionIndex] = {
+          text: [],
           question_id: questions[questionIndex].question_id
-        }
+        };
       }
-      updateAnswers[questionIndex].text.push(optionText);
+      if (isChecked) {
+        updateAnswers[questionIndex].text.push(optionText);
+      } else {
+        updateAnswers[questionIndex].text = updateAnswers[questionIndex].text.filter(opt => opt !== optionText);
+      }
     }
     setAnswers(updateAnswers);
   };
 
-
   const handleSubmit = async () => {
-    console.log("hi");
-    
-    if(answers.length !== questions.length){
+    if (answers.length !== questions.length || answers.some(answer => !answer || !answer.text)) {
       setError("Please answer all the questions");
-      console.log(error);
       return;
     }
-    
-    const response = await axios.post('http://localhost:8000/response/create_response', {
-      answers
-    });
-    // console.log(response);
 
-    // if (response.data.message === "Response created successfully") {
-      // navigate(`/form/${formId}/submitted`);
-      window.location.href = `/submitted/${formId}`;
-    // }
-  }
+    try {
+      const response = await axios.post('http://localhost:8000/response/create_response', {
+        answers
+      });
+
+      console.log(response.data);
+      if (response.data === "Response created successfully") {
+        window.location.href = `/submitted/${formId}`;
+      } else {
+        setError("Failed to submit response");
+      }
+    } catch (error) {
+      console.error('Error submitting response:', error);
+      setError("Error submitting response");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -137,8 +137,7 @@ const Form = () => {
                 <input
                   type="text"
                   className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
-                  placeholder="Your answer"
-                  defaultValue={''}
+                  value={answers[index]?.text || ''}
                   onChange={(e) => handleAnswerTextChange(index, e.target.value)}
                 />
               )}
@@ -147,10 +146,9 @@ const Form = () => {
                 <textarea
                   className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
                   rows="4"
-                  placeholder="Your answer"
-                  defaultValue={''}
+                  value={answers[index]?.text || ''}
                   onChange={(e) => handleAnswerTextChange(index, e.target.value)}
-                ></textarea>
+                />
               )}
 
               {(question.type === 'mcq' || question.type === 'checkboxes') && (
@@ -162,7 +160,7 @@ const Form = () => {
                         id={`option-${option.option_id}`}
                         name={`question-${question.question_id}`}
                         className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        onChange={(e) => handleOptionChange(index, option.option_text, e.target.checked , question.type)}
+                        onChange={(e) => handleOptionChange(index, option.option_text, e.target.checked, question.type)}
                       />
                       <label htmlFor={`option-${option.option_id}`} className="ml-3 block text-sm font-medium text-gray-700">
                         {option.option_text}
@@ -189,11 +187,10 @@ const Form = () => {
               {error}
             </div>
           )}
-
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default Form
+export default Form;

@@ -16,20 +16,19 @@ FormRoute.post("/create_form", (req, res) => {
         //   console.log(result);
         res.status(200).json({
           message: "Form Created Successfully",
-          formId : result.insertId
+          formId: result.insertId,
         });
       }
     }
   );
-
 });
 
 FormRoute.put(`/update_form/:formId`, (req, res) => {
-  const {formName, formDescription } = req.body;
+  const { formName, formDescription } = req.body;
   const formId = req.params.formId;
-  // console.log(req.body);
+  console.log("body ", req.params);
   db.query(
-    "UPDATE forms SET form_name = ?, description = ? WHERE form_id = ?",
+    "UPDATE forms SET form_name = ?, description = ? WHERE id = ?",
     [formName, formDescription, formId],
     (err, result) => {
       if (err) {
@@ -64,36 +63,35 @@ FormRoute.post("/add_form_to_user", (req, res) => {
   );
 });
 
-
-
 FormRoute.get(`/get_forms`, (req, res) => {
   // console.log("hi");
   // console.log(req.query);
-  const userId = req.query.userId;
-  db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) where user_id = ? " , [userId] , (err, result) => {
+  const userId = req.query.id;
+  db.query(
+    "SELECT * FROM forms left join user_forms on forms.id = user_forms.form_id left join users on users.id = user_forms.user_id where user_id = ? ",
+    [userId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        // console.log(result);
+        res.send(result);
+      }
+    }
+  );
+});
+
+FormRoute.get(`/get_form_view/:formId`, (req, res) => {
+  const formId = req.params.formId;
+  db.query("SELECT * FROM forms where id = ?", [formId], (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      // console.log(result);
-      res.send(result);
+      if (result.length > 0) res.send(result);
+      else res.send({ message: "Form not found" });
     }
   });
 });
-
-FormRoute.get(`/get_form_view/:formId` , (req , res) => {
-  const formId = req.params.formId;
-  db.query("SELECT * FROM forms where form_id = ?" , [formId] , (err , result) => {
-    if(err) {
-      console.log(err);
-    }
-    else {
-      if(result.length > 0)
-        res.send(result);
-      else res.send({message : "Form not found"});
-    }
-  })
-
-})
 
 FormRoute.get(`/get_form/:formId`, (req, res) => {
   const userId = req.query.userId;
@@ -102,49 +100,84 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
   // console.log(req.params);
   const formId = req.params.formId;
   console.log(userId);
-  db.query("SELECT * FROM forms left join user_forms using(form_id) left join users using(user_id) where user_id = ? and form_id = ?" , [userId , formId] , (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      // console.log("hi");
-      // console.log(result);
-      if(result.length > 0){
-        res.send(result);
+  db.query(
+    "SELECT * FROM forms left join user_forms on forms.id = user_forms.form_id left join users on users.id = user_forms.user_id where user_id = ? and form_id = ?",
+    [userId, formId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        // console.log("hi");
+        console.log(result);
+        if (result.length > 0) {
+          res.send(result);
+        } else res.send({ message: "Form not found" });
       }
-      else res.send({message : "Form not found"});
     }
-  });
-
+  );
 });
 
 FormRoute.delete("/delete_form/:formId", (req, res) => {
   const { formId } = req.params;
-  db.query("Delete options from options join questions using(question_id) where form_id = ?", [formId], (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      db.query("Delete questions from questions where form_id = ?", [formId], (err, result) => {
-        if (err) {
-          console.log(err);
-        } else {
-          db.query("Delete from user_forms where form_id = ?", [formId], (err, result) => {
+  console.log(formId);
+  db.query(
+    "Delete answers from answers join questions on answers.question_id = questions.id where form_id = ?",
+    [formId],
+    (err, result) => {
+      if (err) {
+        console.log("A");
+        console.log(err);
+      } else {
+        db.query(
+          "Delete options from options join questions on options.question_id = questions.id where form_id = ?",
+          [formId],
+          (err, result) => {
             if (err) {
+              console.log("A");
               console.log(err);
             } else {
-              db.query("Delete from forms where form_id = ?", [formId], (err, result) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  res.send(message = "Form deleted successfully");
+              db.query(
+                "Delete questions from questions where form_id = ?",
+                [formId],
+                (err, result) => {
+                  if (err) {
+                    console.log("A");
+                    console.log(err);
+                  } else {
+                    db.query(
+                      "Delete from user_forms where form_id = ?",
+                      [formId],
+                      (err, result) => {
+                        if (err) {
+                          console.log("B");
+                          console.log(err);
+                        } else {
+                          // console.log("C");
+                          db.query(
+                            "Delete from forms where id = ?",
+                            [formId],
+                            (err, result) => {
+                              if (err) {
+                                console.log(err);
+                              } else {
+                                res.send(
+                                  (message = "Form deleted successfully")
+                                );
+                              }
+                            }
+                          );
+                        }
+                      }
+                    );
+                  }
                 }
-              });
+              );
             }
-          });
-        }
-      });
+          }
+        );
+      }
     }
-  });
+  );
 });
-
 
 module.exports = FormRoute;
