@@ -178,6 +178,7 @@ QuestionRoute.put("/update_question/:form_id", async (req, res) => {
 QuestionRoute.delete("/delete_question/:question_id", (req, res) => {
   const { question_id } = req.params;
   console.log("question_id", question_id);
+  
   db.query(
     "DELETE FROM options WHERE question_id = ?",
     [question_id],

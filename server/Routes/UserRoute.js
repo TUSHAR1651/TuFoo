@@ -54,4 +54,22 @@ UserRoute.post("/login" , (req , res) => {
 
             
 })
+
+
+UserRoute.get("/get_user/:email" , (req , res) => {
+    const email = req.params.email;
+    console.log(email);
+    db.query("SELECT id FROM users WHERE email = ? ", [email], (err, result) => {
+        if (err) {
+            res.send({err: err});
+        }
+        if (result.length > 0) {
+            // console.log(result)
+            res.send(result);
+        } else {
+            res.send({message: "User not found"});
+        }
+    });
+
+})
 module.exports = UserRoute;

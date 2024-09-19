@@ -46,7 +46,7 @@ FormRoute.put(`/update_form/:formId`, (req, res) => {
 FormRoute.post("/add_form_to_user", (req, res) => {
   const { form_id, userId } = req.body;
   // console.log(req.body);
-  console.log(form_id, userId);
+  console.log(req.body);
   db.query(
     "INSERT INTO user_forms (user_id, form_id) VALUES (?, ?)",
     [userId, form_id],
