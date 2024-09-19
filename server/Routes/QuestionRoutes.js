@@ -27,12 +27,12 @@ function getQuestionTypeId(type) {
 QuestionRoute.get("/get_questions", (req, res) => {
   // console.log(req.query);
   const form_id = req.query.form_id;
-  console.log(form_id);
+  // console.log(form_id);
   db.query("SELECT questions.id , question_text , type_name , question_type_id , form_id FROM questions left join question_types on questions.question_type_id = question_types.id WHERE form_id = ?" , [form_id], (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
+      // console.log(result);
       res.send(result);
     }
   });
@@ -41,7 +41,7 @@ QuestionRoute.get("/get_questions", (req, res) => {
 
 QuestionRoute.post("/create_question", async (req, res) => {
   const questions = req.body.questions;
-    console.log("Questions:", questions);
+    // console.log("Questions:", questions);
     // console.log(req.body);
 
   try {
@@ -49,12 +49,12 @@ QuestionRoute.post("/create_question", async (req, res) => {
       const { type , questionText } = questions[i];
         // if (text == "") continue;
         
-      console.log(type);
+      // console.log(type);
       const id1 = await getQuestionTypeId(type);
-      console.log("Question Type Id:", id1);
+      // console.log("Question Type Id:", id1);
       let question_id = -1;
       if (id1 !== -1) {
-        console.log(id1);
+        // console.log(id1);
         await new Promise((resolve, reject) => {
             db.query(
               "INSERT INTO questions ( question_text ,question_type_id, form_id) VALUES (?, ? ,?)",
@@ -74,7 +74,7 @@ QuestionRoute.post("/create_question", async (req, res) => {
         });
       }
       const options = questions[i].options;
-      console.log(question_id);
+      // console.log(question_id);
         if (options.length > 0) {
           for (let i = 0; i < options.length; i++) {
             await new Promise((resolve, reject) => {
@@ -121,7 +121,7 @@ QuestionRoute.put("/update_question/:form_id", async (req, res) => {
     // console.log(questions[i]);
     if (question_id) {
       db.query(
-        "UPDATE questions SET question_text = ?, question_type_id = ? WHERE question_id = ?",
+        "UPDATE questions SET question_text = ?, question_type_id = ? WHERE id = ?",
         [questionText, id, question_id],
         (err, result) => {
           if (err) {
@@ -148,7 +148,7 @@ QuestionRoute.put("/update_question/:form_id", async (req, res) => {
       for (let i = 0; i < options.length; i++) {
         if(options[i].option_id) {
           db.query(
-            "UPDATE options SET option_text = ? WHERE option_id = ?",
+            "UPDATE options SET option_text = ? WHERE id = ?",
             [options[i].option_text, options[i].option_id],
             (err, result) => {
               if (err) {
@@ -177,13 +177,29 @@ QuestionRoute.put("/update_question/:form_id", async (req, res) => {
 
 QuestionRoute.delete("/delete_question/:question_id", (req, res) => {
   const { question_id } = req.params;
-  db.query("DELETE FROM questions WHERE question_id = ?", [question_id], (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.send(message = "Question deleted successfully");
+  console.log("question_id", question_id);
+  db.query(
+    "DELETE FROM options WHERE question_id = ?",
+    [question_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        db.query(
+          "DELETE FROM questions WHERE id = ?",
+          [question_id],
+          (err, result) => {
+            if (err) {
+              console.log(err);
+            } else {
+              res.status(200).send(message = "Question deleted successfully");
+            }
+          }
+        );
+      }
     }
-  });
+  );
+  
 });
 QuestionRoute.delete(`/delete_questions/:form_id`, (req, res) => {
   const questions = req.body;

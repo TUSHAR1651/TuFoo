@@ -23,7 +23,7 @@ const Dashboard = () => {
     axios
       .get('http://localhost:8000/form/get_forms', { params: { id : userId } })
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         setForms(response.data);
       })
       .catch((error) => {

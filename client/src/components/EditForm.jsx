@@ -8,12 +8,14 @@ const EditForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const formId = location.pathname.split('/').pop();
-    console.log(location.pathname.split('/'));
-    console.log("A" , formId);
+    // console.log(location.pathname.split('/'));
+    // console.log("A" , formId);
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
     const [questions, setQuestions] = useState([]);
     const [error, setError] = useState('');
+    const [DeletedOptions , setDeletedOptions] = useState([]);
+    const [DeletedQuestions , setDeletedQuestions] = useState([]);
 
     useEffect(() => {
         getForm();
@@ -52,18 +54,18 @@ const EditForm = () => {
                     // console.log(options);
 
                     return {
-                        question_id: question.question_id,
+                        question_id: question.id,
                         type: question.type_name || 'short-answer',
                         questionText: question.question_text || '',
                         options: options.map(option => ({
                             option_text: option.option_text || '',
-                            option_id: option.option_id
+                            option_id: option.id
                         }))
                     };
                 } catch (optionsError) {
                     console.error('Error fetching options:', optionsError);
                     return {
-                        question_id: question.question_id,
+                        question_id: question.id,
                         type: question.type_name || 'short-answer',
                         questionText: question.question_text || '',
                         options: []
@@ -86,10 +88,7 @@ const EditForm = () => {
     }, [questions]);
 
     const addQuestion = () => {
-
         setQuestions([...questions, { type: 'short-answer', questionText: '', options: [] }]);
-
-
     };
 
     const removeQuestion = (index , question_id) => {
@@ -97,12 +96,12 @@ const EditForm = () => {
         const updatedQuestions = questions.filter((_, i) => i !== index);
         setQuestions(updatedQuestions);
 
-        // console.log(1 , question_id);
+        // console.log("question_id ", question_id);
 
         if (question_id) {
-            const response = axios.delete(`http://localhost:8000/question/delete_question/${question_id}`);
-            
+            setDeletedQuestions([...DeletedQuestions, question_id]);
         }
+        // console.log(dee);
     };
 
     const handleQuestionTextChange = (index, text) => {
@@ -124,14 +123,17 @@ const EditForm = () => {
     };
 
     const removeOption = (questionIndex, optionIndex, option_id) => {
-        // console.log(option_id);
+        // console.log("option_id " , option_id);
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].options.splice(optionIndex, 1);
         setQuestions(updatedQuestions);
 
         if (option_id) {
-            const response = axios.delete(`http://localhost:8000/options/delete_option/${option_id}`);
+            console.log("hi ", option_id);
+            setDeletedOptions([...DeletedOptions, option_id]);
         }
+        
+        
 
     };
 
@@ -194,6 +196,31 @@ const EditForm = () => {
             console.error('Error updating questions:', err);
             setError("Failed to update questions");
 
+        }
+
+        try {
+            console.log(DeletedOptions);
+            for (let i = 0; i < DeletedOptions.length; i++) {
+                const option_id = DeletedOptions[i];
+                console.log("option_id ", option_id);
+                await axios.delete(`http://localhost:8000/options/delete_option/${option_id}`);
+            }
+        } catch (err) {
+            console.error('Error deleting options:', err);
+            setError("Failed to delete options");
+        }
+
+        try {
+            console.log(DeletedQuestions);
+            for (var i = 0; i < DeletedQuestions.length; i++) {
+                const question_id = DeletedQuestions[i];
+                // console.log("question_id ", question_id);
+                const response = axios.delete(`http://localhost:8000/question/delete_question/${question_id}`);
+            }
+
+        } catch (err) {
+            console.error('Error deleting questions:', err);
+            setError("Failed to delete questions");
         }
         if(error) {
             return;

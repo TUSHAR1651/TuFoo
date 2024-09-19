@@ -106,7 +106,7 @@ const Form = () => {
         answers
       });
 
-      console.log(response.data);
+      // console.log(response.data);
       if (response.data === "Response created successfully") {
         window.location.href = `/submitted/${formId}`;
       } else {

@@ -18,7 +18,7 @@ OptionsRoute.get("/get_options", (req, res) => {
 
 OptionsRoute.delete("/delete_options", (req, res) => {
     const questions = req.body;
-    console.log(questions);
+    // console.log(questions);
     for (var i = 0; i < questions.length; i++) {
         const { question_id } = questions[i];
         db.query("DELETE FROM options WHERE question_id = ?", [question_id], (err, result) => {
@@ -34,6 +34,7 @@ OptionsRoute.delete("/delete_options", (req, res) => {
 
 OptionsRoute.delete("/delete_option/:option_id", (req, res) => {
     const { option_id } = req.params;
+    console.log("option_id", option_id);
     db.query("DELETE FROM options WHERE id = ?", [option_id], (err, result) => {
         if (err) {
             console.log(err);
