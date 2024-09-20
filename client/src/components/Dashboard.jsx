@@ -94,7 +94,7 @@ const Dashboard = () => {
   }
 
   const copyLinkToClipboard = () => {
-    const link = `${window.location.origin}/form/${currentFormId}/view`;
+    const link = `${window.location.origin}/dashboard/form/${currentFormId}/view`;
     navigator.clipboard.writeText(link).then(() => {
       alert('Link copied to clipboard!');
     }, (err) => {
@@ -277,7 +277,7 @@ const Dashboard = () => {
           <p className="text-gray-600 mb-6">Copy the link below to share your form:</p>
           <input
             type="text"
-            value={`${window.location.origin}/form/${currentFormId}/view`}
+            value={`${window.location.origin}/dashboard/form/${currentFormId}/view`}
             readOnly
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4"
           />
