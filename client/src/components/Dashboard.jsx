@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { FaLink, FaEdit, FaChartBar, FaTrash, FaShareAlt, FaPlus } from 'react-icons/fa';
+import { FaLink, FaEdit, FaChartBar, FaTrash, FaShareAlt, FaPlus  ,FaUser} from 'react-icons/fa';
 import ToggleButton from './ToggleButton';
 import Modal from 'react-modal';
+import Profile from './Profile';
 
 // Bind modal to your appElement
 Modal.setAppElement('#root');
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const [shareModalIsOpen, setShareModalIsOpen] = useState(false);
   const [emailToShare, setEmailToShare] = useState("");
   const [currentFormIdForSharing, setCurrentFormIdForSharing] = useState(null);
+  const [ProfileOpen , setProfileOpen] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -134,20 +136,30 @@ const Dashboard = () => {
       });
   };
 
-  const handleToggleFormStatus = (formId) => {
-    // Your logic to handle form status toggle
+  const handleProfileClick = () => {
+    setProfileOpen(!ProfileOpen);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="relative text-center mb-12">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
             Your Dashboard
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-gray-600 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
             Manage your forms and create new ones with ease.
           </p>
+
+          {/* Profile Button Positioned in Top-Right Corner */}
+          <div className="absolute top-0 right-0 mt-4 mr-4">
+            <button
+              className="flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              onClick={handleProfileClick}
+            >
+              <FaUser className="mr-2" /> Profile
+            </button>
+          </div>
         </div>
 
         <div className="mb-10 text-center">
@@ -279,6 +291,18 @@ const Dashboard = () => {
             Copy Link
           </button>
         </div>
+      </Modal>
+      <Modal 
+        isOpen={ProfileOpen}
+        onRequestClose={() => setProfileOpen(!ProfileOpen)}
+        contentLabel="Profile Modal"
+        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+      >
+        <Profile
+          
+          onClose={() => setProfileOpen(!ProfileOpen)}
+        />
       </Modal>
     </div>
   );
