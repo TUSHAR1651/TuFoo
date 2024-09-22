@@ -180,4 +180,21 @@ FormRoute.delete("/delete_form/:formId", (req, res) => {
   );
 });
 
+
+FormRoute.put(`/toggle_form_status`, (req, res) => {
+  const { formId, newState } = req.body;
+  console.log(formId, newState);
+  db.query(
+    "UPDATE forms SET form_open = ? WHERE id = ?",
+    [newState, formId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 module.exports = FormRoute;

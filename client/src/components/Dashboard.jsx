@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { FaLink, FaEdit, FaChartBar, FaTrash, FaShareAlt } from 'react-icons/fa';
+import { FaLink, FaEdit, FaChartBar, FaTrash, FaShareAlt, FaPlus } from 'react-icons/fa';
+import ToggleButton from './ToggleButton';
 import Modal from 'react-modal';
 
 // Bind modal to your appElement
@@ -16,7 +17,6 @@ const Dashboard = () => {
   const userId = Cookies.get('userId');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentFormId, setCurrentFormId] = useState(null);
-
   const [shareModalIsOpen, setShareModalIsOpen] = useState(false);
   const [emailToShare, setEmailToShare] = useState("");
   const [currentFormIdForSharing, setCurrentFormIdForSharing] = useState(null);
@@ -46,12 +46,12 @@ const Dashboard = () => {
 
   const handleFormClick = (formId) => {
     navigate(`/dashboard/form/${formId}`);
-  }
+  };
 
   const handleLinkClicked = (formId) => {
     setCurrentFormId(formId);
     setModalIsOpen(true);
-  }
+  };
 
   const handleCreateForm = () => {
     navigate('/dashboard/createForm');
@@ -59,7 +59,7 @@ const Dashboard = () => {
 
   const handleResponseClicked = (formId) => {
     navigate(`/dashboard/response/${formId}`);
-  }
+  };
 
   const handleShareAccess = (formId) => {
     setCurrentFormIdForSharing(formId);
@@ -85,13 +85,13 @@ const Dashboard = () => {
   const closeModal = () => {
     setModalIsOpen(false);
     setCurrentFormId(null);
-  }
+  };
 
   const closeShareModal = () => {
     setShareModalIsOpen(false);
     setEmailToShare("");
     setCurrentFormIdForSharing(null);
-  }
+  };
 
   const copyLinkToClipboard = () => {
     const link = `${window.location.origin}/dashboard/form/${currentFormId}/view`;
@@ -100,14 +100,13 @@ const Dashboard = () => {
     }, (err) => {
       console.error('Could not copy text: ', err);
     });
-  }
+  };
 
   const handleShareWithUser = (formId, email) => {
     if (!email) {
       alert("Please enter a valid email address.");
       return;
     }
-    console.log(email);
     axios.get(`http://localhost:8000/user/get_user/${email}`)
       .then((response) => {
         if (response.data.length === 0) {
@@ -115,8 +114,6 @@ const Dashboard = () => {
           return;
         }
         const userId = response.data[0].id;
-        console.log("userId", userId);
-        console.log("formId", formId);
         const form_id = formId;
         axios.post(`http://localhost:8000/form/add_form_to_user`, {
           form_id,
@@ -134,7 +131,11 @@ const Dashboard = () => {
       .catch((error) => {
         console.error("Error fetching user ID:", error);
         alert("Failed to share form. Please try again.");
-      }); 
+      });
+  };
+
+  const handleToggleFormStatus = (formId) => {
+    // Your logic to handle form status toggle
   };
 
   return (
@@ -149,11 +150,12 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="mb-10">
+        <div className="mb-10 text-center">
           <button
             onClick={handleCreateForm}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
           >
+            <FaPlus className="mr-2" />
             Create New Form
           </button>
         </div>
@@ -164,7 +166,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
             <div className="col-span-full text-center py-12">
               <p className="text-xl text-gray-500">Loading forms...</p>
@@ -173,53 +175,53 @@ const Dashboard = () => {
             forms.map((form) => (
               <div
                 key={form.form_id}
-                className="bg-white overflow-hidden shadow-sm rounded-lg hover:shadow-md transition-all duration-300 flex flex-col"
+                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="p-6 flex-grow cursor-pointer">
+                <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">{form.form_name}</h3>
-                  <p className="text-sm text-gray-600">{form.description}</p>
-                </div>
-                <div className="px-6 py-4 bg-gray-50 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+                  <p className="text-sm text-gray-600 mb-4">{form.description}</p>
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => handleLinkClicked(form.form_id)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-150 ease-in-out flex items-center"
+                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 rounded"
                     >
                       <FaLink className="mr-2" />
                       Form Link
                     </button>
-                  </div>
-                  <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleFormClick(form.form_id)}
-                      className="p-2 text-gray-600 hover:text-blue-600 transition-colors duration-150 ease-in-out"
-                      title="Edit Form"
+                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded"
                     >
-                      <FaEdit />
+                      <FaEdit className="mr-2" />
+                      Edit Form
                     </button>
                     <button
                       onClick={() => handleResponseClicked(form.form_id)}
-                      className="p-2 text-gray-600 hover:text-green-600 transition-colors duration-150 ease-in-out"
-                      title="View Responses"
+                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded"
                     >
-                      <FaChartBar />
+                      <FaChartBar className="mr-2" />
+                      View Responses
+                    </button>
+                    <button
+                      onClick={() => handleShareAccess(form.form_id)}
+                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded"
+                    >
+                      <FaShareAlt className="mr-2" />
+                      Share
                     </button>
                     <button
                       onClick={(e) => handleDeleteForm(e, form.form_id)}
-                      className="p-2 text-gray-600 hover:text-red-600 transition-colors duration-150 ease-in-out"
-                      title="Delete Form"
+                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-100 rounded"
                     >
-                      <FaTrash />
+                      <FaTrash className="mr-2" />
+                      Delete
                     </button>
-
-                    {/* Share Access Button */}
                     <button
-                      onClick={() => handleShareAccess(form.form_id)}
-                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-150"
-                      title="Give Access to Other User"
+                      // onClick={(e) => handleResponseClicked(e, form.form_id)}
                     >
-                      <FaShareAlt className="mr-2" />
-                      Give Access
+                      <ToggleButton
+                        formId={form.form_id}
+                      />
                     </button>
                   </div>
                 </div>
@@ -233,57 +235,46 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Modal for Sharing Access */}
+      {/* Share Access Modal */}
       <Modal
         isOpen={shareModalIsOpen}
         onRequestClose={closeShareModal}
         contentLabel="Share Form Access Modal"
-        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24 transform transition-transform duration-300 ease-out scale-100"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300"
+        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
       >
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Share Form Access</h2>
-          <p className="text-gray-600 mb-6">Enter the email address of the user you want to share access with.</p>
-
-          {/* Input for Email */}
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Share Form Access</h2>
           <input
             type="email"
+            placeholder="Enter email to share with"
             value={emailToShare}
             onChange={(e) => setEmailToShare(e.target.value)}
-            placeholder="Enter user email"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4"
+            className="w-full border-gray-300 p-2 rounded mb-4"
           />
-
-          {/* Submit Button */}
           <button
             onClick={() => handleShareWithUser(currentFormIdForSharing, emailToShare)}
-            className="px-6 py-3 bg-green-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+            className="px-6 py-2 bg-blue-600 text-white rounded"
           >
-            Share Access
+            Share
           </button>
         </div>
       </Modal>
 
-      {/* Modal for Copying Form Link */}
+      {/* Link Modal */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
         contentLabel="Form Link Modal"
-        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24 transform transition-transform duration-300 ease-out scale-100"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300"
+        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
       >
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Form Link</h2>
-          <p className="text-gray-600 mb-6">Copy the link below to share your form:</p>
-          <input
-            type="text"
-            value={`${window.location.origin}/dashboard/form/${currentFormId}/view`}
-            readOnly
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4"
-          />
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Form Link</h2>
+          <p className="mb-6">{`${window.location.origin}/dashboard/form/${currentFormId}/view`}</p>
           <button
             onClick={copyLinkToClipboard}
-            className="px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+            className="px-6 py-2 bg-blue-600 text-white rounded"
           >
             Copy Link
           </button>
