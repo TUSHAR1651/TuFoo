@@ -33,10 +33,7 @@ const Response = () => {
         }
     };
 
-    const { google } = require("googleapis"); // Import Google APIs client
-
-  
-
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
             <div className="max-w-4xl mx-auto">
