@@ -6,7 +6,6 @@ import Cookies from 'js-cookie';
 const Response = () => {
     const userId = Cookies.get('userId');
     const form_id = window.location.pathname.split('/')[3];
-    // console.log("formId" , form_id )
     const [questions, setQuestions] = useState([]);
     const [formName, setFormName] = useState('Form Responses');
 
@@ -27,13 +26,16 @@ const Response = () => {
             );
 
             setQuestions(questionsWithAnswers);
-            const formNameResponse = await axios.get(`http://localhost:8000/form/get_form/${form_id}`, {params: { userId} });
-            console.log(formNameResponse);
+            const formNameResponse = await axios.get(`http://localhost:8000/form/get_form/${form_id}`, { params: { userId } });
             setFormName(formNameResponse.data[0].form_name);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     };
+
+    const { google } = require("googleapis"); // Import Google APIs client
+
+  
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
@@ -69,13 +71,17 @@ const Response = () => {
                     ))}
                 </div>
 
-                <button
-                    onClick={() => window.location.href = '/dashboard'}
-                    className="mt-12 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-                >
-                    <IoArrowBack className="mr-2" />
-                    Back to Dashboard
-                </button>
+                <div className="mt-12 space-y-4">
+                    <button
+                        onClick={() => window.location.href = '/dashboard'}
+                        className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+                    >
+                        <IoArrowBack className="mr-2" />
+                        Back to Dashboard
+                    </button>
+
+                   
+                </div>
             </div>
         </div>
     );
