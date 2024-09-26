@@ -6,14 +6,15 @@ ResponseRoute.post("/create_response", (req, res) => {
     const answers = req.body.answers;
     console.log(answers);
     for (var i = 0; i < answers.length; i++) {
-        const { text, question_id } = answers[i];
+        const { text, questionId } = answers[i];
+        console.log("Question-Id", questionId);
         console.log(typeof(text));
         if (typeof (text) === "object") {
             for (var j = 0; j < text.length; j++) {
                 const answer_text = text[j];
                 db.query(
                     "INSERT INTO answers (question_id, answer_text) VALUES (?, ?)",
-                    [question_id, answer_text],
+                    [questionId, answer_text],
                     (err, result) => {
                         if (err) {
                             console.log(err);
@@ -25,7 +26,7 @@ ResponseRoute.post("/create_response", (req, res) => {
         else {
             db.query(
                 "INSERT INTO answers (question_id, answer_text) VALUES (?, ?)",
-                [question_id, text],
+                [questionId, text],
                 (err, result) => {
                     if (err) {
                         console.log(err);

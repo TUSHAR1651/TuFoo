@@ -197,4 +197,19 @@ FormRoute.put(`/toggle_form_status`, (req, res) => {
   );
 });
 
+FormRoute.get(`/get_form_responses/:formId`, (req, res) => {
+  const formId = req.params.formId;
+  db.query(
+    "SELECT * FROM responses where form_id = ?",
+    [formId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 module.exports = FormRoute;

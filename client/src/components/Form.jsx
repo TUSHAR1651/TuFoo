@@ -69,7 +69,9 @@ const Form = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8000/response/create_response', { answers });
+      console.log(answers);
+      // const response = null;
+      const response = await axios.post('http://localhost:8000/response/create_response', { answers  });
       if (response.data === "Response created successfully") {
         navigate(`/submitted/${formId}`);
       } else {
