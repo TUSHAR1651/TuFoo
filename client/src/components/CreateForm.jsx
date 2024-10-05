@@ -1,9 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { UserContext } from './UserProvider';
-import { Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Modal from 'react-modal';
+import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 
 const CreateForm = () => {
     const [formName, setFormName] = useState('');
@@ -11,24 +10,14 @@ const CreateForm = () => {
     const [questions, setQuestions] = useState([]);
     const [error, setError] = useState('');
     const userId = Cookies.get('userId');
-    const [modalIsopen, setModalIsOpen] = useState(false);
-    
-
-    const openModal = () => {
-        setModalIsOpen(true);
-    }
-
-    const closeModal = () => {
-        setModalIsOpen(false);
-    }
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const addQuestion = () => {
         setQuestions([...questions, { type: 'short-answer', questionText: '', options: [] }]);
     };
 
     const removeQuestion = (index) => {
-        const updatedQuestions = questions.filter((_, i) => i !== index);
-        setQuestions(updatedQuestions);
+        setQuestions(questions.filter((_, i) => i !== index));
     };
 
     const handleQuestionTypeChange = (index, type) => {
@@ -63,7 +52,6 @@ const CreateForm = () => {
         updatedQuestions[questionIndex].options.splice(optionIndex, 1);
         setQuestions(updatedQuestions);
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -90,100 +78,63 @@ const CreateForm = () => {
             }
         }
 
-        const formData = {
-            formName,
-            formDescription,
-            questions,
-            userId
-        };
+        const formData = { formName, formDescription, questions, userId };
 
-        var success = false;
         try {
             const formId = await createForm(formData);
             console.log(`Form created with ID: ${formId}`);
-            // setModalIsOpen(true);
             window.location.href = '/dashboard';
-            // success = true;
         } catch (err) {
             setError('Failed to create form. Please try again.');
             console.error(err);
         }
-
-        
-        // Modal();
-        // if (success) {
-        //     setFormName('');
-        //     setFormDescription('');
-        //     setQuestions([]);
-        //     setError('');
-        //     Navigate('/dashboard');
-        // }
     };
 
-
-
     async function createForm(formData) {
-        if (userId === null) {
-            // setError('User ID is null');
+        if (!userId) {
             console.log("User id is null");
             throw new Error('User ID is null');
-        } 
+        }
         try {
             const response = await axios.post('http://localhost:8000/form/create_form', formData);
             if (response.data.message === "Form Created Successfully") {
                 const formId = response.data.formId;
-                // console.log(response.data);
-                // console.log(`Form created with ID: ${formId}`);
-                // try {
-                    await axios.post('http://localhost:8000/form/add_form_to_user', {
-                        form_id: formId,
-                        userId: userId
-                    });
-                // }
-                // catch (err) {
-
-                //     console.error('Error adding form to user:', err);
-                   
-                // }
-                // try {
-                    await axios.post('http://localhost:8000/question/create_question', {
-                        questions: formData.questions,
-                        form_id: formId
-                    });
-            // } 
-                // catch (err) {
-                    // console.error('Error creating questions:', err);
-                    // throw err;
-
-                // }
+                await axios.post('http://localhost:8000/form/add_form_to_user', {
+                    form_id: formId,
+                    userId: userId
+                });
+                await axios.post('http://localhost:8000/question/create_question', {
+                    questions: formData.questions,
+                    form_id: formId
+                });
                 return formId;
             } else {
-                console.error('Error creating form:', response.data.message);
                 throw new Error('Form creation failed.');
             }
         } catch (error) {
             console.error('Error creating form:', error);
-            throw error; // Re-throw error to be caught in handleSubmit
+            throw error;
         }
-
-        
-        
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden">
-                <div className="px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-600">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div className="px-8 py-6 bg-gradient-to-r from-purple-600 to-indigo-600">
                     <h2 className="text-3xl font-extrabold text-white">Create a New Form</h2>
                 </div>
                 <div className="p-8">
-                    {error && <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">{error}</div>}
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Form Name</label>
                         <input
                             type="text"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                             value={formName}
                             onChange={(e) => setFormName(e.target.value)}
                             placeholder="Enter form name"
@@ -194,7 +145,7 @@ const CreateForm = () => {
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Form Description</label>
                         <textarea
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                             value={formDescription}
                             onChange={(e) => setFormDescription(e.target.value)}
                             placeholder="Enter form description"
@@ -203,24 +154,24 @@ const CreateForm = () => {
                     </div>
 
                     {questions.length === 0 && (
-                        <p className="mb-4 text-gray-600 italic">No questions added yet. Click 'Add Question' to start.</p>
+                        <p className="mb-6 text-gray-600 italic text-center">No questions added yet. Click 'Add Question' to start.</p>
                     )}
 
                     {questions.map((question, index) => (
-                        <div key={index} className="mb-8 bg-gray-50 rounded-lg p-6 shadow-md">
+                        <div key={index} className="mb-8 bg-gray-50 rounded-lg p-6 shadow-lg">
                             <div className="flex justify-between items-center mb-4">
                                 <label className="block text-lg font-semibold text-gray-800">Question {index + 1}</label>
                                 <button
                                     type="button"
-                                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+                                    className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
                                     onClick={() => removeQuestion(index)}
                                 >
-                                    Remove
+                                    <FaTrash className="inline-block mr-2" /> Remove
                                 </button>
                             </div>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                 placeholder="Enter your question"
                                 value={question.questionText}
                                 onChange={(e) => handleQuestionTextChange(index, e.target.value)}
@@ -229,7 +180,7 @@ const CreateForm = () => {
 
                             <label className="block text-sm font-medium text-gray-700 mt-4 mb-2">Question Type</label>
                             <select
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                 value={question.type}
                                 onChange={(e) => handleQuestionTypeChange(index, e.target.value)}
                             >
@@ -246,7 +197,7 @@ const CreateForm = () => {
                                         <div key={optionIndex} className="flex items-center mb-2">
                                             <input
                                                 type="text"
-                                                className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+                                                className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                                                 placeholder="Enter option"
                                                 value={option}
                                                 onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
@@ -254,19 +205,19 @@ const CreateForm = () => {
                                             />
                                             <button
                                                 type="button"
-                                                className="ml-2 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+                                                className="ml-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
                                                 onClick={() => removeOption(index, optionIndex)}
                                             >
-                                                Remove
+                                                <FaTimes />
                                             </button>
                                         </div>
                                     ))}
                                     <button
                                         type="button"
-                                        className="mt-2 py-2 px-4 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+                                        className="mt-2 py-2 px-4 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200"
                                         onClick={() => addOption(index)}
                                     >
-                                        Add Option
+                                        <FaPlus className="inline-block mr-2" /> Add Option
                                     </button>
                                 </div>
                             )}
@@ -276,27 +227,30 @@ const CreateForm = () => {
                     <div className="flex justify-between mt-8">
                         <button
                             type="button"
-                            className="py-2 px-6 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out transform hover:scale-105"
+                            className="py-2 px-6 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 transform hover:scale-105"
                             onClick={addQuestion}
                         >
-                            Add Question
+                            <FaPlus className="inline-block mr-2" /> Add Question
                         </button>
 
                         <button
                             type="submit"
-                            className="py-2 px-6 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out transform hover:scale-105"
+                            className="py-2 px-6 bg-green-600 text-white rounded-full shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 transform hover:scale-105"
                         >
                             Create Form
                         </button>
                     </div>
-
-                    {error && <p className="text-red-600 mt-4">{error}</p>}
                 </div>
             </form>
-            <div>
-                <Modal isOpen={modalIsopen} onClose={closeModal} />
 
-            </div>
+            <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={() => setModalIsOpen(false)}
+                className="bg-white rounded-lg p-8 max-w-md mx-auto mt-24"
+                overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center"
+            >
+                {/* Modal content */}
+            </Modal>
         </div>
     );
 };

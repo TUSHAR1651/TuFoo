@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { FaLink, FaEdit, FaChartBar, FaTrash, FaShareAlt, FaPlus  ,FaUser} from 'react-icons/fa';
+import { FaLink, FaEdit, FaChartBar, FaTrash, FaShareAlt, FaPlus, FaUser } from 'react-icons/fa';
 import ToggleButton from './ToggleButton';
 import Modal from 'react-modal';
 import Profile from './Profile';
 
-// Bind modal to your appElement
 Modal.setAppElement('#root');
 
 const Dashboard = () => {
@@ -21,7 +20,7 @@ const Dashboard = () => {
   const [shareModalIsOpen, setShareModalIsOpen] = useState(false);
   const [emailToShare, setEmailToShare] = useState("");
   const [currentFormIdForSharing, setCurrentFormIdForSharing] = useState(null);
-  const [ProfileOpen , setProfileOpen] = useState(false);
+  const [ProfileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -141,20 +140,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="relative text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+        <div className="relative text-center mb-16">
+          <h1 className="text-5xl font-extrabold text-indigo-900 sm:text-6xl md:text-7xl">
             Your Dashboard
           </h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-600 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+          <p className="mt-4 max-w-3xl mx-auto text-xl text-indigo-600">
             Manage your forms and create new ones with ease.
           </p>
-
-          {/* Profile Button Positioned in Top-Right Corner */}
           <div className="absolute top-0 right-0 mt-4 mr-4">
             <button
-              className="flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              className="flex items-center justify-center px-6 py-3 text-lg font-semibold text-white bg-indigo-600 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300"
               onClick={handleProfileClick}
             >
               <FaUser className="mr-2" /> Profile
@@ -162,10 +159,10 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="mb-10 text-center">
+        <div className="mb-12 text-center">
           <button
             onClick={handleCreateForm}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition duration-300"
           >
             <FaPlus className="mr-2" />
             Create New Form
@@ -173,136 +170,126 @@ const Dashboard = () => {
         </div>
 
         {error && (
-          <div className="text-center py-4">
-            <p className="text-red-500">{error}</p>
+          <div className="text-center py-6 mb-8">
+            <p className="text-red-600 text-lg">{error}</p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-xl text-gray-500">Loading forms...</p>
+            <div className="col-span-full text-center py-16">
+              <p className="text-2xl text-indigo-600">Loading forms...</p>
             </div>
           ) : forms.length > 0 ? (
             forms.map((form) => (
               <div
                 key={form.form_id}
-                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
               >
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{form.form_name}</h3>
-                  <p className="text-sm text-gray-600 mb-4">{form.description}</p>
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="p-8">
+                  <h3 className="text-2xl font-bold text-indigo-900 mb-3">{form.form_name}</h3>
+                  <p className="text-indigo-600 mb-6">{form.description}</p>
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => handleLinkClicked(form.form_id)}
-                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 rounded"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-full hover:bg-blue-200 transition duration-300"
                     >
                       <FaLink className="mr-2" />
                       Form Link
                     </button>
                     <button
                       onClick={() => handleFormClick(form.form_id)}
-                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition duration-300"
                     >
                       <FaEdit className="mr-2" />
                       Edit Form
                     </button>
                     <button
                       onClick={() => handleResponseClicked(form.form_id)}
-                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-green-600 bg-green-100 rounded-full hover:bg-green-200 transition duration-300"
                     >
                       <FaChartBar className="mr-2" />
                       View Responses
                     </button>
                     <button
                       onClick={() => handleShareAccess(form.form_id)}
-                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-purple-600 bg-purple-100 rounded-full hover:bg-purple-200 transition duration-300"
                     >
                       <FaShareAlt className="mr-2" />
                       Share
                     </button>
                     <button
                       onClick={(e) => handleDeleteForm(e, form.form_id)}
-                      className="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-100 rounded"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-full hover:bg-red-200 transition duration-300"
                     >
                       <FaTrash className="mr-2" />
                       Delete
                     </button>
-                    <button
-                      // onClick={(e) => handleResponseClicked(e, form.form_id)}
-                    >
-                      <ToggleButton
-                        formId={form.form_id}
-                      />
-                    </button>
+                    <ToggleButton formId={form.form_id} />
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="col-span-full text-center text-gray-500 py-12">
-              <p className="text-xl">No forms found. Create your first form!</p>
+            <div className="col-span-full text-center text-indigo-600 py-16">
+              <p className="text-2xl">No forms found. Create your first form!</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Share Access Modal */}
       <Modal
         isOpen={shareModalIsOpen}
         onRequestClose={closeShareModal}
         contentLabel="Share Form Access Modal"
-        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+        className="bg-white rounded-2xl p-8 max-w-md mx-auto mt-24 shadow-2xl"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center"
       >
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Share Form Access</h2>
+          <h2 className="text-3xl font-bold text-indigo-900 mb-6">Share Form Access</h2>
           <input
             type="email"
             placeholder="Enter email to share with"
             value={emailToShare}
             onChange={(e) => setEmailToShare(e.target.value)}
-            className="w-full border-gray-300 p-2 rounded mb-4"
+            className="w-full border-2 border-indigo-300 p-3 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             onClick={() => handleShareWithUser(currentFormIdForSharing, emailToShare)}
-            className="px-6 py-2 bg-blue-600 text-white rounded"
+            className="px-8 py-3 bg-indigo-600 text-white rounded-full text-lg font-semibold hover:bg-indigo-700 transition duration-300"
           >
             Share
           </button>
         </div>
       </Modal>
 
-      {/* Link Modal */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
         contentLabel="Form Link Modal"
-        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+        className="bg-white rounded-2xl p-8 max-w-md mx-auto mt-24 shadow-2xl"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center"
       >
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Form Link</h2>
-          <p className="mb-6">{`${window.location.origin}/dashboard/form/${currentFormId}/view`}</p>
+          <h2 className="text-3xl font-bold text-indigo-900 mb-6">Form Link</h2>
+          <p className="mb-6 text-indigo-600 text-lg">{`${window.location.origin}/dashboard/form/${currentFormId}/view`}</p>
           <button
             onClick={copyLinkToClipboard}
-            className="px-6 py-2 bg-blue-600 text-white rounded"
+            className="px-8 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold hover:bg-blue-700 transition duration-300"
           >
             Copy Link
           </button>
         </div>
       </Modal>
-      <Modal 
+
+      <Modal
         isOpen={ProfileOpen}
         onRequestClose={() => setProfileOpen(!ProfileOpen)}
         contentLabel="Profile Modal"
-        className="bg-white shadow-xl rounded-lg p-8 max-w-md mx-auto mt-24"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+        className="bg-white rounded-2xl p-8 max-w-md mx-auto mt-24 shadow-2xl"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center"
       >
-        <Profile
-          
-          onClose={() => setProfileOpen(!ProfileOpen)}
-        />
+        <Profile onClose={() => setProfileOpen(!ProfileOpen)} />
       </Modal>
     </div>
   );

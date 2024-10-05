@@ -69,9 +69,7 @@ const Form = () => {
     }
 
     try {
-      console.log(answers);
-      // const response = null;
-      const response = await axios.post('http://localhost:8000/response/create_response', { answers  });
+      const response = await axios.post('http://localhost:8000/response/create_response', { answers });
       if (response.data === "Response created successfully") {
         navigate(`/submitted/${formId}`);
       } else {
@@ -86,42 +84,61 @@ const Form = () => {
   const renderQuestion = (question, index) => {
     switch (question.type) {
       case 'short-answer':
-      case 'long-answer':
         return (
           <input
-            type={question.type === 'short-answer' ? 'text' : 'textarea'}
-            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
+            type="text"
             value={answers[index].text}
             onChange={(e) => handleAnswerChange(index, e.target.value, question.id)}
+            className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition duration-300 ease-in-out"
+            placeholder="Your answer"
+          />
+        );
+      case 'long-answer':
+        return (
+          <textarea
+            value={answers[index].text}
+            onChange={(e) => handleAnswerChange(index, e.target.value, question.id)}
+            className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition duration-300 ease-in-out"
+            rows="4"
+            placeholder="Your answer"
           />
         );
       case 'mcq':
+        return (
+          <div className="space-y-2">
+            {question.options.map((option) => (
+              <label key={option.id} className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`question-${question.id}`}
+                  value={option.text}
+                  checked={answers[index].text === option.text}
+                  onChange={() => handleAnswerChange(index, option.text, question.id)}
+                  className="form-radio h-5 w-5 text-purple-600 transition duration-300 ease-in-out"
+                />
+                <span className="text-gray-700">{option.text}</span>
+              </label>
+            ))}
+          </div>
+        );
       case 'checkboxes':
         return (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {question.options.map((option) => (
-              <div key={option.id} className="flex items-center">
+              <label key={option.id} className="flex items-center space-x-3 cursor-pointer">
                 <input
-                  type={question.type === 'mcq' ? 'radio' : 'checkbox'}
-                  id={`option-${option.id}`}
-                  name={`question-${question.id}`}
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  checked={question.type === 'mcq'
-                    ? answers[index].text === option.text
-                    : answers[index].text.includes(option.text)}
-                  onChange={() => {
-                    const newValue = question.type === 'mcq'
-                      ? option.text
-                      : answers[index].text.includes(option.text)
-                        ? answers[index].text.filter(t => t !== option.text)
-                        : [...answers[index].text, option.text];
+                  type="checkbox"
+                  checked={answers[index].text.includes(option.text)}
+                  onChange={(e) => {
+                    const newValue = e.target.checked
+                      ? [...answers[index].text, option.text]
+                      : answers[index].text.filter(t => t !== option.text);
                     handleAnswerChange(index, newValue, question.id);
                   }}
+                  className="form-checkbox h-5 w-5 text-purple-600 rounded transition duration-300 ease-in-out"
                 />
-                <label htmlFor={`option-${option.id}`} className="ml-3 block text-sm font-medium text-gray-700">
-                  {option.text}
-                </label>
-              </div>
+                <span className="text-gray-700">{option.text}</span>
+              </label>
             ))}
           </div>
         );
@@ -130,48 +147,51 @@ const Form = () => {
     }
   };
 
+  if (!formData.isOpen) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-2xl shadow-xl text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Form Closed</h2>
+          <p className="text-gray-600">We apologize, but this form is no longer accepting responses.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all">
-        {!formData.isOpen ? (
-          <div className="bg-red-500 text-white text-center p-4">
-            <p className="text-2xl font-bold">Form Closed</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 py-8 px-6 sm:px-10">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{formData.name}</h1>
+            <p className="text-purple-100">{formData.description}</p>
           </div>
-        ) : (
-          <>
-            <div className="px-8 py-8 bg-gradient-to-r from-blue-600 to-indigo-600">
-              <h2 className="text-4xl font-extrabold text-white tracking-wide">{formData.name}</h2>
-              <p className="mt-2 text-blue-100">{formData.description}</p>
-            </div>
-            <div className="p-8 space-y-8">
-              {questions.map((question, index) => (
-                <div key={question.id} className="bg-gray-50 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                  <label className="block text-xl font-semibold text-gray-800 mb-4">
-                    <span className="text-indigo-600 mr-2">Q{index + 1}.</span>
-                    {question.text}
-                  </label>
-                  {renderQuestion(question, index)}
-                </div>
-              ))}
-
-              <div className="flex justify-end mt-12">
-                <button
-                  type="submit"
-                  onClick={handleSubmit}
-                  className="py-3 px-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out transform hover:scale-105"
-                >
-                  Submit Response
-                </button>
+          <div className="px-6 sm:px-10 py-8 space-y-8">
+            {questions.map((question, index) => (
+              <div key={question.id} className="bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  <span className="text-purple-600 mr-2">{index + 1}.</span>
+                  {question.text}
+                </h3>
+                {renderQuestion(question, index)}
               </div>
-
-              {error && (
-                <div className="text-red-600 text-center mt-4">
-                  {error}
-                </div>
-              )}
+            ))}
+            <div className="flex justify-end mt-8">
+              <button
+                onClick={handleSubmit}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg"
+              >
+                Submit Response
+              </button>
             </div>
-          </>
-        )}
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mt-4" role="alert">
+                <p className="font-bold">Error</p>
+                <p>{error}</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
