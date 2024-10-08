@@ -36,9 +36,11 @@ const Response = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-8">
             <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                
                 <header className="mb-10">
                     <h1 className="text-5xl font-bold text-gray-900 mb-4">{formName}</h1>
                     <p className="text-lg text-gray-600">Review all responses for this form</p>
+                    
                 </header>
 
                 <div className="space-y-10">

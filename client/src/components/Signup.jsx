@@ -30,8 +30,11 @@ const Signup = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 via-blue-400 to-purple-600">
+      <h1 className="absolute top-5 right-5 text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.6)' }}>
+        tuFoo
+      </h1>
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-800">Signup</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-800">New to tuFoo signup here</h1>
         <p className="text-sm text-center text-gray-600">
           Enter your credentials to signup
         </p>

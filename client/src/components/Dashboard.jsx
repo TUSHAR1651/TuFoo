@@ -140,7 +140,10 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-300 py-12 px-4 sm:px-6 lg:px-8">
+      <h1 className="absolute top-5 right-5 text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.6)' }}>
+        tuFoo
+      </h1>
       <div className="max-w-7xl mx-auto">
         <div className="relative text-center mb-16">
           <h1 className="text-5xl font-extrabold text-indigo-900 sm:text-6xl md:text-7xl">
@@ -149,7 +152,7 @@ const Dashboard = () => {
           <p className="mt-4 max-w-3xl mx-auto text-xl text-indigo-600">
             Manage your forms and create new ones with ease.
           </p>
-          <div className="absolute top-0 right-0 mt-4 mr-4">
+          <div className="absolute top-0 left-0 mt-4 mr-4">
             <button
               className="flex items-center justify-center px-6 py-3 text-lg font-semibold text-white bg-indigo-600 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300"
               onClick={handleProfileClick}

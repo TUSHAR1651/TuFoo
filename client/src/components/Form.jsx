@@ -160,10 +160,18 @@ const Form = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+     
+
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 py-8 px-6 sm:px-10">
+          <div className="bg-purple-600 py-8 px-6 sm:px-10">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{formData.name}</h1>
+            <h1
+              className="absolute top-5 right-5 text-4xl font-bold text-white "
+              style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.6)' }}
+            >
+              tuFoo
+            </h1>
             <p className="text-purple-100">{formData.description}</p>
           </div>
           <div className="px-6 sm:px-10 py-8 space-y-8">
