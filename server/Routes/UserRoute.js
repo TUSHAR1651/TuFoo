@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 UserRoute.post("/signup", (req, res) => {
     const { email, password } = req.body;
+    
     console.log(req.body);
     db.query("Select * from users where email = ?", [email], (err, result) => {
         if (err) {

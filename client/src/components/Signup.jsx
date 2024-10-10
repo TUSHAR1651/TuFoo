@@ -8,9 +8,18 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [userAlreadyExists , setUserAlreadyExists] = useState(false);
-
+  const [passwordError, setPasswordError] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password.length < 8) {
+      setPasswordError(true);
+      setUserAlreadyExists(false);
+      return;
+    }
+    else {
+      setPasswordError(false);
+    }
     try {
       const response = await axios.post('http://localhost:8000/user/signup', { email, password });
       console.log(response.data);
@@ -39,6 +48,11 @@ const Signup = () => {
           Enter your credentials to signup
         </p>
         <hr />
+        {passwordError && (
+          <p className="text-sm text-center text-red-600">
+            Password must be at least 8 characters
+          </p>
+        )}
         {signupSuccess && (
           <p className="text-sm text-center text-green-600">
             Signup successful. Please login
