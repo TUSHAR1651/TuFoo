@@ -63,9 +63,14 @@ const Form = () => {
   };
 
   const handleSubmit = async () => {
-    if (answers.some(answer => !answer.text)) {
-      setError("Please answer all the questions");
-      return;
+    console.log(answers);
+    for(var answer of answers) {
+      const { text, questionId } = answer;
+      if (text == '' || text.size == 0) {
+        setError("Please fill in all fields");
+        console.log("Please fill in all fields");
+        return;
+      }
     }
 
     try {
