@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 UserRoute.post("/signup", (req, res) => {
     const { email, password } = req.body;
     
-    console.log(req.body);
+    // console.log(req.body);
     db.query("Select * from users where email = ?", [email], (err, result) => {
         if (err) {
             console.log(err);
@@ -34,12 +34,14 @@ UserRoute.post("/login" , (req , res) => {
     console.log(req.body);
     const { email, password } = req.body;
     db.query("SELECT * FROM users WHERE email = ? AND password = ? ", [email, password], (err, result) => {
+        console.log(result);
         if (err) {
             res.send({err: err});
         }
-        if (result.length > 0) {
+        else if (result.length > 0) {
             // console.log(result[0]);
             const id = result[0].id;
+            
             const token = jwt.sign({id}, "jwtkey", {
                 expiresIn: "1d"
             });
@@ -49,6 +51,7 @@ UserRoute.post("/login" , (req , res) => {
             res.send({message : "Login Successfull", token :token , user_id : id});
             
         } else {
+
             res.send({message: "Wrong username or password"});
         }
     });
