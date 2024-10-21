@@ -184,16 +184,28 @@ QuestionRoute.delete("/delete_question/:question_id", (req, res) => {
     [question_id],
     (err, result) => {
       if (err) {
+        // console.log("hi");
         console.log(err);
       } else {
         db.query(
-          "DELETE FROM questions WHERE id = ?",
+          "DELETE FROM answers WHERE question_id = ?",
           [question_id],
           (err, result) => {
             if (err) {
               console.log(err);
-            } else {
-              res.status(200).send(message = "Question deleted successfully");
+            }
+            else {
+              db.query(
+                "DELETE FROM questions WHERE id = ?",
+                [question_id],
+                (err, result) => {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    res.status(200).send(message = "Question deleted successfully");
+                  }
+                }
+              );
             }
           }
         );

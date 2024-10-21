@@ -26,6 +26,8 @@ app.use("/question", QuestionRoute);
 app.use("/options", OptionsRoute);
 app.use("/response", ResponseRoute);
 
-app.listen(8000, () => {
+const PORT = process.env.DATABASE_PORT;
+console.log(PORT);
+app.listen(PORT, () => {
   console.log("Listening on port 8000");
 });
