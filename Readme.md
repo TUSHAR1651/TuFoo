@@ -29,8 +29,8 @@ Form Manager is a web application that allows users to create, edit, share, view
 
 ### Prerequisites
 
-- Node.js (version X.X.X)
-- MySQL (version X.X.X)
+- Node.js 
+- MySQL 
 
 ### Setup
 
