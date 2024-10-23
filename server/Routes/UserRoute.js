@@ -3,6 +3,10 @@ const UserRoute = express.Router();
 const db = require("../utils/db");
 const jwt = require("jsonwebtoken");
 
+
+const jwtKey = process.env.JWT_KEY;
+console.log("key" , jwtKey);
+
 UserRoute.post("/signup", (req, res) => {
     const { email, password } = req.body;
     
@@ -42,7 +46,7 @@ UserRoute.post("/login" , (req , res) => {
             // console.log(result[0]);
             const id = result[0].id;
             
-            const token = jwt.sign({id}, "jwtkey", {
+            const token = jwt.sign({id}, jwtKey , {
                 expiresIn: "1d"
             });
             // console.log(id);
