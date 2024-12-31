@@ -4,6 +4,8 @@ const FormRoute = express.Router();
 
 FormRoute.post("/create_form", (req, res) => {
   const { formName, formDescription } = req.body;
+  
+  
   // console.log(req.body);
   // console.log(formName, formDescription);
   db.query(
@@ -26,7 +28,7 @@ FormRoute.post("/create_form", (req, res) => {
 FormRoute.put(`/update_form/:formId`, (req, res) => {
   const { formName, formDescription } = req.body;
   const formId = req.params.formId;
-  console.log("body ", req.params);
+  // console.log("body ", req.params);
   db.query(
     "UPDATE forms SET form_name = ?, description = ? WHERE id = ?",
     [formName, formDescription, formId],
@@ -46,7 +48,7 @@ FormRoute.put(`/update_form/:formId`, (req, res) => {
 FormRoute.post("/add_form_to_user", (req, res) => {
   const { form_id, userId } = req.body;
   // console.log(req.body);
-  console.log(req.body);
+  // console.log(req.body);
   db.query(
     "INSERT INTO user_forms (user_id, form_id) VALUES (?, ?)",
     [userId, form_id],
@@ -99,7 +101,7 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
   // console.log(req.query);
   // console.log(req.params);
   const formId = req.params.formId;
-  console.log(userId);
+  // console.log(userId);
   db.query(
     "SELECT * FROM forms left join user_forms on forms.id = user_forms.form_id left join users on users.id = user_forms.user_id where user_id = ? and form_id = ?",
     [userId, formId],
@@ -108,7 +110,7 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
         console.log(err);
       } else {
         // console.log("hi");
-        console.log(result);
+        // console.log(result);
         if (result.length > 0) {
           res.send(result);
         } else res.send({ message: "Form not found" });
@@ -119,13 +121,13 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
 
 FormRoute.delete("/delete_form/:formId", (req, res) => {
   const { formId } = req.params;
-  console.log(formId);
+  // console.log(formId);
   db.query(
     "Delete answers from answers join questions on answers.question_id = questions.id where form_id = ?",
     [formId],
     (err, result) => {
       if (err) {
-        console.log("A");
+        // console.log("A");
         console.log(err);
       } else {
         db.query(
@@ -133,7 +135,7 @@ FormRoute.delete("/delete_form/:formId", (req, res) => {
           [formId],
           (err, result) => {
             if (err) {
-              console.log("A");
+              // console.log("A");
               console.log(err);
             } else {
               db.query(
@@ -141,7 +143,7 @@ FormRoute.delete("/delete_form/:formId", (req, res) => {
                 [formId],
                 (err, result) => {
                   if (err) {
-                    console.log("A");
+                    // console.log("A");
                     console.log(err);
                   } else {
                     db.query(
@@ -149,7 +151,7 @@ FormRoute.delete("/delete_form/:formId", (req, res) => {
                       [formId],
                       (err, result) => {
                         if (err) {
-                          console.log("B");
+                          // console.log("B");
                           console.log(err);
                         } else {
                           // console.log("C");
@@ -183,7 +185,7 @@ FormRoute.delete("/delete_form/:formId", (req, res) => {
 
 FormRoute.put(`/toggle_form_status`, (req, res) => {
   const { formId, newState } = req.body;
-  console.log(formId, newState);
+  // console.log(formId, newState);
   db.query(
     "UPDATE forms SET form_open = ? WHERE id = ?",
     [newState, formId],

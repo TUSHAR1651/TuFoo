@@ -2,15 +2,17 @@ const express = require("express");
 const UserRoute = express.Router();
 const db = require("../utils/db");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
 
 
 const jwtKey = process.env.JWT_KEY;
-console.log("key" , jwtKey);
+
 
 UserRoute.post("/signup", (req, res) => {
     const { email, password } = req.body;
     
-    // console.log(req.body);
+    console.log(req.body);
     db.query("Select * from users where email = ?", [email], (err, result) => {
         if (err) {
             console.log(err);

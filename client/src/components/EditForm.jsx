@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 import { PlusCircle, MinusCircle, Save, ArrowLeft, Trash2, Edit3 } from 'lucide-react';
 
 const EditForm = () => {
@@ -40,7 +41,7 @@ const EditForm = () => {
             });
 
             const questionsData = questionsResponse.data || [];
-
+            // console.log(questionsData);
             const questionsWithOptions = await Promise.all(questionsData.map(async (question) => {
                 try {
                     const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
@@ -52,6 +53,7 @@ const EditForm = () => {
                         question_id: question.id,
                         type: question.type_name || 'short-answer',
                         questionText: question.question_text || '',
+                        isOn : question.required,
                         options: options.map(option => ({
                             option_text: option.option_text || '',
                             option_id: option.id
@@ -62,12 +64,15 @@ const EditForm = () => {
                     return {
                         question_id: question.id,
                         type: question.type_name || 'short-answer',
+                        isOn : question.required,
                         questionText: question.question_text || '',
                         options: []
                     };
                 }
             }));
             setQuestions(questionsWithOptions);
+
+            console.log(questionsWithOptions);
         } catch (error) {
             console.error("Error fetching form:", error);
             setError('Failed to fetch form data.');
@@ -88,9 +93,12 @@ const EditForm = () => {
     const removeQuestion = (index, question_id) => {
         const updatedQuestions = questions.filter((_, i) => i !== index);
         setQuestions(updatedQuestions);
+        // console.log();
         if (question_id) {
             setDeletedQuestions([...DeletedQuestions, question_id]);
         }
+        console.log(DeletedQuestions);
+        
     };
 
     const handleQuestionTextChange = (index, text) => {
@@ -100,16 +108,20 @@ const EditForm = () => {
     };
 
     const handleOptionChange = (questionIndex, optionIndex, text) => {
+        // console.log(text);
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].options[optionIndex] = { ...updatedQuestions[questionIndex].options[optionIndex], option_text: text };
+        // console.log(updatedQuestions[questionIndex].options[optionIndex]);
         setQuestions(updatedQuestions);
     };
 
     const addOption = (questionIndex) => {
+        // console.log("hi");
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].options.push({ option_text: '' });
         setQuestions(updatedQuestions);
     };
+   
 
     const removeOption = (questionIndex, optionIndex, option_id) => {
         const updatedQuestions = [...questions];
@@ -119,6 +131,11 @@ const EditForm = () => {
         if (option_id) {
             setDeletedOptions([...DeletedOptions, option_id]);
         }
+    };
+    const toggleQuestionState = (index) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[index].isOn = !updatedQuestions[index].isOn; 
+        setQuestions(updatedQuestions);
     };
 
     const handleSubmit = async (e) => {
@@ -185,6 +202,7 @@ const EditForm = () => {
         }
 
         try {
+
             for (let question_id of DeletedQuestions) {
                 await axios.delete(`http://localhost:8000/question/delete_question/${question_id}`);
             }
@@ -245,73 +263,91 @@ const EditForm = () => {
                             )}
 
                             {questions.map((question, index) => (
-                                <div key={index} className="bg-gray-50 rounded-xl p-6 shadow-md hover:shadow-lg transition duration-300">
+                                <div key={index} className="mb-8 bg-gray-50 rounded-lg p-6 shadow-lg">
                                     <div className="flex justify-between items-center mb-4">
-                                        <label className="text-lg font-semibold text-indigo-600">Question {index + 1}</label>
-                                        <button
-                                            type="button"
-                                            className="p-2 text-red-500 hover:text-red-600 focus:outline-none"
-                                            onClick={() => removeQuestion(index, question.question_id)}
-                                        >
-                                            <MinusCircle className="w-6 h-6" />
-                                        </button>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                                        placeholder="Enter your question"
-                                        value={question.questionText}
-                                        onChange={(e) => handleQuestionTextChange(index, e.target.value)}
-                                        required
-                                    />
-
-                                    <label className="block text-sm font-medium text-gray-700 mt-4 mb-2">Question Type</label>
-                                    <select
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                                        value={question.type}
-                                        onChange={(e) => handleQuestionTypeChange(index, e.target.value)}
-                                    >
-                                        <option value="short-answer">Short Answer</option>
-                                        <option value="long-answer">Long Answer</option>
-                                        <option value="mcq">Multiple Choice (MCQ)</option>
-                                        <option value="checkboxes">Checkboxes</option>
-                                    </select>
-
-                                    {(question.type === 'mcq' || question.type === 'checkboxes') && (
-                                        <div className="mt-4 space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700">Options</label>
-                                            {question.options.map((option, optionIndex) => (
-                                                <div key={optionIndex} className="flex items-center space-x-2">
-                                                    <input
-                                                        type="text"
-                                                        className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                                                        placeholder="Enter option"
-                                                        value={option.option_text}
-                                                        onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
-                                                        required
-                                                    />
+                                        <label className="block text-lg font-semibold text-gray-800">Question {index + 1}</label>
+                                            <div>
+                                                {/* Toggle Button */}
+                                                    <h5 className="inline-block text-lg text-gray-800 mr-4">
+                                                        Required:
+                                                    </h5>
                                                     <button
                                                         type="button"
-                                                        className="p-2 text-red-500 hover:text-red-600 focus:outline-none"
-                                                        onClick={() => removeOption(index, optionIndex, option.option_id)}
+                                                        onClick={() => toggleQuestionState(index)}
+                                                        className={`px-4 py-2 rounded-full text-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-300 ${
+                                                        question.isOn ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
+                                                        }`}
                                                     >
-                                                        <MinusCircle className="w-5 h-5" />
+                                                    {question.isOn ? 'ON' : 'OFF'}
                                                     </button>
                                                 </div>
-                                            ))}
-                                            <button
-                                                type="button"
-                                                className="mt-2 flex items-center text-indigo-600 hover:text-indigo-700 focus:outline-none"
-                                                onClick={() => addOption(index)}
-                                            >
-                                                <PlusCircle className="w-5 h-5 mr-2" />
-                                                Add Option
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-
+                                                {/* Remove Button */}
+                                                    <button
+                                                    type="button"
+                                                    className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
+                                                    onClick={() => removeQuestion(index , question.question_id)}
+                                                    >
+                                                        <FaTrash className="inline-block mr-2" /> Remove
+                                                    </button>
+                                            </div>
+                            
+                                                    {/* Question Text Input */}
+                                            <input
+                                                        type="text"
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                                                        placeholder="Enter your question"
+                                                        value={question.questionText}
+                                                        onChange={(e) => handleQuestionTextChange(index, e.target.value)}
+                                                        required
+                                                    />
+                            
+                                                    {/* Question Type Selector */}
+                                                    <label className="block text-sm font-medium text-gray-700 mt-4 mb-2">Question Type</label>
+                                                    <select
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                                                        value={question.type}
+                                                        onChange={(e) => handleQuestionTypeChange(index, e.target.value)}
+                                                    >
+                                                        <option value="short-answer">Short Answer</option>
+                                                        <option value="long-answer">Long Answer</option>
+                                                        <option value="mcq">Multiple Choice (MCQ)</option>
+                                                        <option value="checkboxes">Checkboxes</option>
+                                                    </select>
+                            
+                                                    {/* Options Section for MCQ or Checkboxes */}
+                                                    {(question.type === 'mcq' || question.type === 'checkboxes') && (
+                                                        <div className="mt-4">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                                                        {question.options.map((option, optionIndex) => (
+                                                            <div key={optionIndex} className="flex items-center mb-2">
+                                                            <input
+                                                                type="text"
+                                                                className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                                                                placeholder="Enter option"
+                                                                value={option.option_text}
+                                                                onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
+                                                                required
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="ml-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
+                                                                onClick={() => removeOption(index, optionIndex)}
+                                                            >
+                                                                <FaTimes />
+                                                            </button>
+                                                            </div>
+                                                        ))}
+                                                        <button
+                                                            type="button"
+                                                            className="mt-2 py-2 px-4 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200"
+                                                            onClick={() => addOption(index)}
+                                                        >
+                                                            <FaPlus className="inline-block mr-2" /> Add Option
+                                                        </button>
+                                                        </div>
+                                                    )}
+                                                    </div>
+                                                ))}
                             <div className="flex justify-between mt-8">
                                 <button
                                     type="button"
