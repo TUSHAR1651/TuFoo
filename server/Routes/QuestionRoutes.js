@@ -145,7 +145,7 @@ QuestionRoute.put("/update_question/:form_id", async (req, res) => {
           }
           else {
             resolve();
-            console.log("result",result);
+            // console.log("result",result);
             question_id = result.insertId;
           }
         }
@@ -153,7 +153,7 @@ QuestionRoute.put("/update_question/:form_id", async (req, res) => {
       
     });
     }
-    console.log("id" , question_id);
+    // console.log("id" , question_id);
     if (options.length > 0) {
       for (let i = 0; i < options.length; i++) {
         if(options[i].option_id) {

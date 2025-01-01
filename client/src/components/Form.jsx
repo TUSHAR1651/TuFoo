@@ -10,6 +10,15 @@ const Form = () => {
   const [answers, setAnswers] = useState([]);
   const [error, setError] = useState('');
 
+  const Asnwers = (questionsWithOptions) => {
+    const newAnswers = questionsWithOptions.map(question => ({
+      text: '',
+      questionId: question.id,
+      required: question.isOn,
+    }));
+    setAnswers(newAnswers);
+  };
+
   useEffect(() => {
     getForm();
   }, [formId]);
@@ -20,7 +29,7 @@ const Form = () => {
         axios.get(`http://localhost:8000/form/get_form_view/${formId}`),
         axios.get('http://localhost:8000/question/get_questions', { params: { form_id: formId } })
       ]);
-
+      // console.log(questionsResponse);
       if (formResponse.data.message === "Form not found") {
         navigate('/dashboard');
         return;
@@ -37,9 +46,11 @@ const Form = () => {
         const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
           params: { question_id: question.id }
         });
+        
         return {
           id: question.id,
           type: question.type_name || 'short-answer',
+          isOn : question.required,
           text: question.question_text || '',
           options: optionsResponse.data.map(option => ({
             text: option.option_text || '',
@@ -49,25 +60,31 @@ const Form = () => {
       }));
 
       setQuestions(questionsWithOptions);
-      setAnswers(questionsWithOptions.map(() => ({ text: '', questionId: '' })));
+      // console.log(questionsWithOptions);
+      Asnwers(questionsWithOptions);
+  
+
     } catch (error) {
       console.error('Error fetching form data:', error);
       setError('Error fetching form data');
     }
   };
 
-  const handleAnswerChange = (index, value, questionId) => {
+
+  const handleAnswerChange = (index, value, questionId , required) => {
     setAnswers(prev => prev.map((answer, i) =>
-      i === index ? { text: value, questionId } : answer
+      i === index ? { text: value, questionId , required } : answer
     ));
   };
 
   const handleSubmit = async () => {
-    console.log(answers);
+    // console.log(answers);
     for(var answer of answers) {
-      const { text, questionId } = answer;
-      if (text == '' || text.size == 0) {
-        setError("Please fill in all fields");
+      const { text, questionId , required } = answer;
+      // console.log("text",text);
+      // console.log("questionId",questionId);
+      if ((text == '' || text.size == 0) && required) {
+        setError(`Please fill the data in all the required fields`);
         console.log("Please fill in all fields");
         return;
       }
@@ -93,7 +110,7 @@ const Form = () => {
           <input
             type="text"
             value={answers[index].text}
-            onChange={(e) => handleAnswerChange(index, e.target.value, question.id)}
+            onChange={(e) => handleAnswerChange(index, e.target.value, question.id , question.isOn)}
             className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition duration-300 ease-in-out"
             placeholder="Your answer"
           />
@@ -102,7 +119,7 @@ const Form = () => {
         return (
           <textarea
             value={answers[index].text}
-            onChange={(e) => handleAnswerChange(index, e.target.value, question.id)}
+            onChange={(e) => handleAnswerChange(index, e.target.value, question.id , question.isOn)}
             className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 transition duration-300 ease-in-out"
             rows="4"
             placeholder="Your answer"
@@ -118,7 +135,7 @@ const Form = () => {
                   name={`question-${question.id}`}
                   value={option.text}
                   checked={answers[index].text === option.text}
-                  onChange={() => handleAnswerChange(index, option.text, question.id)}
+                  onChange={() => handleAnswerChange(index, option.text, question.id, question.isOn)}
                   className="form-radio h-5 w-5 text-purple-600 transition duration-300 ease-in-out"
                 />
                 <span className="text-gray-700">{option.text}</span>
@@ -138,7 +155,7 @@ const Form = () => {
                     const newValue = e.target.checked
                       ? [...answers[index].text, option.text]
                       : answers[index].text.filter(t => t !== option.text);
-                    handleAnswerChange(index, newValue, question.id);
+                    handleAnswerChange(index, newValue, question.id, question.isOn);
                   }}
                   className="form-checkbox h-5 w-5 text-purple-600 rounded transition duration-300 ease-in-out"
                 />
@@ -182,10 +199,13 @@ const Form = () => {
           <div className="px-6 sm:px-10 py-8 space-y-8">
             {questions.map((question, index) => (
               <div key={question.id} className="bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="flex items-center justify-between">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   <span className="text-purple-600 mr-2">{index + 1}.</span>
                   {question.text}
                 </h3>
+                  {!question.isOn ? null : <p className='text-red-600 font-bold size-10'>*</p>}
+                </div>
                 {renderQuestion(question, index)}
               </div>
             ))}
