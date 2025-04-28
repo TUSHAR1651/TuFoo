@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Form = () => {
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
   const { formId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', description: '', isOpen: false });
@@ -26,8 +27,8 @@ const Form = () => {
   const getForm = async () => {
     try {
       const [formResponse, questionsResponse] = await Promise.all([
-        axios.get(`http://localhost:8000/form/get_form_view/${formId}`),
-        axios.get('http://localhost:8000/question/get_questions', { params: { form_id: formId } })
+        axios.get(`${REACT_APP_API_URL}/form/get_form_view/${formId}`),
+        axios.get(`${REACT_APP_API_URL}/question/get_questions`, { params: { form_id: formId } })
       ]);
       // console.log(questionsResponse);
       if (formResponse.data.message === "Form not found") {
@@ -43,7 +44,7 @@ const Form = () => {
       });
 
       const questionsWithOptions = await Promise.all(questionsResponse.data.map(async (question) => {
-        const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
+        const optionsResponse = await axios.get(`${REACT_APP_API_URL}/options/get_options`, {
           params: { question_id: question.id }
         });
         
@@ -91,7 +92,7 @@ const Form = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8000/response/create_response', { answers });
+      const response = await axios.post(`${REACT_APP_API_URL}/response/create_response`, { answers });
       if (response.data === "Response created successfully") {
         navigate(`/submitted/${formId}`);
       } else {

@@ -34,7 +34,9 @@ FormRoute.put(`/update_form/:formId`, (req, res) => {
     [formName, formDescription, formId],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.status(500).json({
+          message: "Error updating form",
+        });
       } else {
         //   console.log(result);
         res.status(200).json({
@@ -74,7 +76,9 @@ FormRoute.get(`/get_forms`, (req, res) => {
     [userId],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.status(500).json({
+          message: "Error fetching forms",
+        });
       } else {
         // console.log(result);
         res.send(result);
@@ -87,7 +91,9 @@ FormRoute.get(`/get_form_view/:formId`, (req, res) => {
   const formId = req.params.formId;
   db.query("SELECT * FROM forms where id = ?", [formId], (err, result) => {
     if (err) {
-      console.log(err);
+      res.status(500).json({
+        message: "Error fetching form",
+      });
     } else {
       if (result.length > 0) res.send(result);
       else res.send({ message: "Form not found" });
@@ -107,7 +113,9 @@ FormRoute.get(`/get_form/:formId`, (req, res) => {
     [userId, formId],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.status(500).json({
+          message: "Error fetching form",
+        });
       } else {
         // console.log("hi");
         // console.log(result);
@@ -127,40 +135,48 @@ FormRoute.delete("/delete_form/:formId", (req, res) => {
     [formId],
     (err, result) => {
       if (err) {
-        // console.log("A");
-        console.log(err);
+        res.status(500).json({
+          message: "Error deleting form",
+        });
       } else {
         db.query(
           "Delete options from options join questions on options.question_id = questions.id where form_id = ?",
           [formId],
           (err, result) => {
             if (err) {
-              // console.log("A");
-              console.log(err);
+              res.status(500).json({
+                message: "Error deleting form",
+              });
             } else {
               db.query(
                 "Delete questions from questions where form_id = ?",
                 [formId],
                 (err, result) => {
                   if (err) {
-                    // console.log("A");
-                    console.log(err);
+                    res.status(500).json({
+                      message: "Error deleting form",
+                    });
                   } else {
                     db.query(
                       "Delete from user_forms where form_id = ?",
                       [formId],
                       (err, result) => {
                         if (err) {
-                          // console.log("B");
-                          console.log(err);
+                          res.status(500).json({
+                            message: "Error deleting form",
+                          });
                         } else {
-                          // console.log("C");
+                          res.status(200).json({
+                            message: "Form deleted successfully",
+                          });
                           db.query(
                             "Delete from forms where id = ?",
                             [formId],
                             (err, result) => {
                               if (err) {
-                                console.log(err);
+                                res.status(500).json({
+                                  message: "Error deleting form",
+                                });
                               } else {
                                 res.send(
                                   (message = "Form deleted successfully")
@@ -191,9 +207,13 @@ FormRoute.put(`/toggle_form_status`, (req, res) => {
     [newState, formId],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.status(500).json({
+          message: "Error updating form status",
+        });
       } else {
-        res.send(result);
+        res.status(200).json({
+          message: "Form status updated successfully",
+        });
       }
     }
   );
@@ -206,9 +226,11 @@ FormRoute.get(`/get_form_responses/:formId`, (req, res) => {
     [formId],
     (err, result) => {
       if (err) {
-        console.log(err);
+        res.status(500).json({
+          message: "Error fetching form responses",
+        });
       } else {
-        res.send(result);
+        res.status(200).json(result);
       }
     }
   );

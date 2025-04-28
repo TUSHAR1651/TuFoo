@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 
 const CreateForm = () => {
+    const REACT_API_URL = process.env.REACT_APP_API_URL;
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
     const [questions, setQuestions] = useState([]);
@@ -101,14 +102,14 @@ const CreateForm = () => {
             throw new Error('User ID is null');
         }
         try {
-            const response = await axios.post('http://localhost:8000/form/create_form', formData);
+            const response = await axios.post(`${REACT_API_URL}/form/create_form`, formData);
             if (response.data.message === "Form Created Successfully") {
                 const formId = response.data.formId;
-                await axios.post('http://localhost:8000/form/add_form_to_user', {
+                await axios.post(`${REACT_API_URL}/form/add_form_to_user`, {
                     form_id: formId,
                     userId: userId
                 });
-                await axios.post('http://localhost:8000/question/create_question', {
+                await axios.post(`${REACT_API_URL}/question/create_question`, {
                     questions: formData.questions,
                     form_id: formId
                 });

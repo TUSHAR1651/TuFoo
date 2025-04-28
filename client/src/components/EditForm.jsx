@@ -6,6 +6,7 @@ import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 import { PlusCircle, MinusCircle, Save, ArrowLeft, Trash2, Edit3 } from 'lucide-react';
 
 const EditForm = () => {
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
     const userId = Cookies.get('userId');
     const location = useLocation();
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const EditForm = () => {
 
     const getForm = async () => {
         try {
-            const formResponse = await axios.get(`http://localhost:8000/form/get_form/${formId}`, {
+            const formResponse = await axios.get(`${REACT_APP_API_URL}/form/get_form/${formId}`, {
                 params: { userId }
             });
 
@@ -36,7 +37,7 @@ const EditForm = () => {
             setFormName(formData.form_name || '');
             setFormDescription(formData.description || '');
 
-            const questionsResponse = await axios.get('http://localhost:8000/question/get_questions', {
+            const questionsResponse = await axios.get(`${REACT_APP_API_URL}/question/get_questions`, {
                 params: { form_id: formId }
             });
 
@@ -44,7 +45,7 @@ const EditForm = () => {
             // console.log(questionsData);
             const questionsWithOptions = await Promise.all(questionsData.map(async (question) => {
                 try {
-                    const optionsResponse = await axios.get('http://localhost:8000/options/get_options', {
+                    const optionsResponse = await axios.get(`${REACT_APP_API_URL}/options/get_options`, {
                         params: { question_id: question.id }
                     });
                     const options = optionsResponse.data || [];
@@ -127,7 +128,6 @@ const EditForm = () => {
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].options.splice(optionIndex, 1);
         setQuestions(updatedQuestions);
-
         if (option_id) {
             setDeletedOptions([...DeletedOptions, option_id]);
         }
@@ -171,7 +171,7 @@ const EditForm = () => {
         };
 
         try {
-            const response = await axios.put(`http://localhost:8000/form/update_form/${formId}`, formData);
+            const response = await axios.put(`${REACT_APP_API_URL}/form/update_form/${formId}`, formData);
             if (response.data.message !== "Form Updated Successfully") {
                 setError('Failed to update form');
                 return;
@@ -182,7 +182,7 @@ const EditForm = () => {
         }
 
         try {
-            await axios.put(`http://localhost:8000/question/update_question/${formId}`, {
+            await axios.put(`${REACT_APP_API_URL}/question/update_question/${formId}`, {
                 questions
             });
         } catch (err) {
@@ -193,7 +193,7 @@ const EditForm = () => {
 
         try {
             for (let option_id of DeletedOptions) {
-                await axios.delete(`http://localhost:8000/options/delete_option/${option_id}`);
+                await axios.delete(`${REACT_APP_API_URL}/options/delete_option/${option_id}`);
             }
         } catch (err) {
             console.error('Error deleting options:', err);
@@ -204,7 +204,7 @@ const EditForm = () => {
         try {
 
             for (let question_id of DeletedQuestions) {
-                await axios.delete(`http://localhost:8000/question/delete_question/${question_id}`);
+                await axios.delete(`${REACT_APP_API_URL}/question/delete_question/${question_id}`);
             }
         } catch (err) {
             console.error('Error deleting questions:', err);
@@ -331,7 +331,7 @@ const EditForm = () => {
                                                             <button
                                                                 type="button"
                                                                 className="ml-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
-                                                                onClick={() => removeOption(index, optionIndex)}
+                                                                onClick={() => removeOption(index, optionIndex, option.option_id)}
                                                             >
                                                                 <FaTimes />
                                                             </button>

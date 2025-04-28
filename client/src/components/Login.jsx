@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import { UserContext } from './UserProvider';
 
 const Login = () => {
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
     const { setUserId } = useContext(UserContext);
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8000/user/login', { email, password });
+            const response = await axios.post(`${REACT_APP_API_URL}/user/login`, { email, password });
             if (response.data.message === "Login Successfull") {
                 console.log(response.data);
                 Cookies.set('token', response.data.token);

@@ -9,12 +9,13 @@ const ResponseRoute = require("./Routes/ResponseRoute");
 const cors = require("cors");
 const express = require("express");
 const db = require("./utils/db");
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [CLIENT_URL],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -26,8 +27,8 @@ app.use("/question", QuestionRoute);
 app.use("/options", OptionsRoute);
 app.use("/response", ResponseRoute);
 
-const PORT = process.env.DATABASE_PORT;
+const PORT = process.env.SERVER_PORT || 8000;
 console.log(PORT);
 app.listen(PORT, () => {
-  console.log("Listening on port 8000");
+  console.log(`Server is running on port ${PORT}`);
 });

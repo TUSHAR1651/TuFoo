@@ -3,11 +3,11 @@ import axios from 'axios';
 
 const ToggleSwitch = ({ onToggle, onLabel = "On", offLabel = "Off", formId }) => {
     const [isOn, setIsOn] = useState(false); 
-
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
     useEffect(() => {
         const fetchFormState = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/form/get_form_view/${formId}`);
+                const response = await axios.get(`${REACT_APP_API_URL}/form/get_form_view/${formId}`);
                 setIsOn(response.data[0].form_open);
             } catch (error) {
                 console.error("Error fetching form state", error);
@@ -25,7 +25,7 @@ const ToggleSwitch = ({ onToggle, onLabel = "On", offLabel = "Off", formId }) =>
             onToggle(newState);
         }
 
-        axios.put(`http://localhost:8000/form/toggle_form_status`, { formId, newState })
+        axios.put(`${REACT_APP_API_URL}/form/toggle_form_status`, { formId, newState })
             .then(response => {
                 console.log("Form status updated", response.data);
             })

@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import { useState } from 'react';
 const Signup = () => {
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [signupSuccess, setSignupSuccess] = useState(false);
@@ -21,7 +22,7 @@ const Signup = () => {
       setPasswordError(false);
     }
     try {
-      const response = await axios.post('http://localhost:8000/user/signup', { email, password });
+      const response = await axios.post(`${REACT_APP_API_URL}/user/signup`, { email, password });
       console.log(response.data);
       if (response.data.message === "User registered successfully") {
         setSignupSuccess(true);

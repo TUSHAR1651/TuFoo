@@ -4,6 +4,8 @@ import { IoArrowBack } from 'react-icons/io5';
 import Cookies from 'js-cookie';
 
 const Response = () => {
+
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
     const userId = Cookies.get('userId');
     const form_id = window.location.pathname.split('/')[3];
     const [questions, setQuestions] = useState([]);
@@ -15,18 +17,18 @@ const Response = () => {
 
     const getQuestions = async () => {
         try {
-            const questionsResponse = await axios.get(`http://localhost:8000/question/get_questions`, { params: { form_id } });
+            const questionsResponse = await axios.get(`${REACT_APP_API_URL}/question/get_questions`, { params: { form_id } });
             const questionsData = questionsResponse.data;
 
             const questionsWithAnswers = await Promise.all(
                 questionsData.map(async (question) => {
-                    const answerResponse = await axios.get(`http://localhost:8000/response/get_responses`, { params: { question_id: question.id } });
+                    const answerResponse = await axios.get(`${REACT_APP_API_URL}/response/get_responses`, { params: { question_id: question.id } });
                     return { ...question, answers: answerResponse.data };
                 })
             );
 
             setQuestions(questionsWithAnswers);
-            const formNameResponse = await axios.get(`http://localhost:8000/form/get_form/${form_id}`, { params: { userId } });
+            const formNameResponse = await axios.get(`${REACT_APP_API_URL}/form/get_form/${form_id}`, { params: { userId } });
             setFormName(formNameResponse.data[0].form_name);
         } catch (error) {
             console.error("Error fetching data:", error);

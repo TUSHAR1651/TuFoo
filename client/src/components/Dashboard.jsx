@@ -10,6 +10,7 @@ import Profile from './Profile';
 Modal.setAppElement('#root');
 
 const Dashboard = () => {
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +33,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
     axios
-      .get('http://localhost:8000/form/get_forms', { params: { id: userId } })
+      .get(`${REACT_APP_API_URL}/form/get_forms`, { params: { id: userId } })
       .then((response) => {
         setForms(response.data);
       })
@@ -70,7 +71,7 @@ const Dashboard = () => {
   const handleDeleteForm = (e, formId) => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this form?")) {
-      axios.delete(`http://localhost:8000/form/delete_form/${formId}`, {
+      axios.delete(`${REACT_APP_API_URL}/form/delete_form/${formId}`, {
         params: { id: userId }
       })
         .then(() => {
@@ -108,7 +109,7 @@ const Dashboard = () => {
       alert("Please enter a valid email address.");
       return;
     }
-    axios.get(`http://localhost:8000/user/get_user/${email}`)
+    axios.get(`${REACT_APP_API_URL}/user/get_user/${email}`)
       .then((response) => {
         if (response.data.length === 0) {
           alert("User not found. Please enter a valid email address.");
@@ -116,7 +117,7 @@ const Dashboard = () => {
         }
         const userId = response.data[0].id;
         const form_id = formId;
-        axios.post(`http://localhost:8000/form/add_form_to_user`, {
+        axios.post(`${REACT_APP_API_URL}/form/add_form_to_user`, {
           form_id,
           userId
         })
