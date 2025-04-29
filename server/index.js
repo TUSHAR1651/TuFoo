@@ -21,6 +21,11 @@ app.use(
   })
 );
 
+app.options('*', cors({
+  origin: [CLIENT_URL],
+  credentials: true
+}));
+
 app.use("/form", FormRoute);
 app.use("/user", UserRoute);
 app.use("/question", QuestionRoute);
