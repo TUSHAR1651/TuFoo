@@ -13,6 +13,7 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 const app = express();
 app.use(express.json());
+console.log("Client Url" , CLIENT_URL);
 app.use(
   cors({
     origin: [CLIENT_URL],
