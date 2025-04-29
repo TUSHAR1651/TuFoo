@@ -16,14 +16,14 @@ app.use(express.json());
 console.log("Client Url" , CLIENT_URL);
 app.use(
   cors({
-    origin: [CLIENT_URL],
+    origin: CLIENT_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
 app.options('*', cors({
-  origin: [CLIENT_URL],
+  origin: CLIENT_URL,
   credentials: true
 }));
 
