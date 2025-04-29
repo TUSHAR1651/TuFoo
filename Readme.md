@@ -31,10 +31,3 @@ Form Manager is a web application that allows users to create, edit, share, view
 
 - Node.js 
 - MySQL 
-
-### Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/tushar1651/TuFoo.git
-   
