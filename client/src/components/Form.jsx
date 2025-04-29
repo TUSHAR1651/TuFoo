@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const Form = () => {
   const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
   const { formId } = useParams();
+  const userId = Cookies.get('userId');
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', description: '', isOpen: false });
   const [questions, setQuestions] = useState([]);
@@ -92,7 +94,7 @@ const Form = () => {
     }
 
     try {
-      const response = await axios.post(`${REACT_APP_API_URL}/response/create_response`, { answers });
+      const response = await axios.post(`${REACT_APP_API_URL}/response/create_response`, { answers , formId, userId });
       if (response.data === "Response created successfully") {
         navigate(`/submitted/${formId}`);
       } else {

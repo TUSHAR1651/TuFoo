@@ -4,12 +4,12 @@ import { IoArrowBack } from 'react-icons/io5';
 import Cookies from 'js-cookie';
 
 const Response = () => {
-
     const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
     const userId = Cookies.get('userId');
     const form_id = window.location.pathname.split('/')[3];
     const [questions, setQuestions] = useState([]);
     const [formName, setFormName] = useState('Form Responses');
+    const [loadingSheet, setLoadingSheet] = useState(false);
 
     useEffect(() => {
         getQuestions();
@@ -22,12 +22,15 @@ const Response = () => {
 
             const questionsWithAnswers = await Promise.all(
                 questionsData.map(async (question) => {
-                    const answerResponse = await axios.get(`${REACT_APP_API_URL}/response/get_responses`, { params: { question_id: question.id } });
+                    const answerResponse = await axios.get(`${REACT_APP_API_URL}/response/get_responses`, {
+                        params: { question_id: question.id }
+                    });
                     return { ...question, answers: answerResponse.data };
                 })
             );
 
             setQuestions(questionsWithAnswers);
+
             const formNameResponse = await axios.get(`${REACT_APP_API_URL}/form/get_form/${form_id}`, { params: { userId } });
             setFormName(formNameResponse.data[0].form_name);
         } catch (error) {
@@ -35,38 +38,49 @@ const Response = () => {
         }
     };
 
+    const handleViewSheet = async () => {
+        try {
+            setLoadingSheet(true);
+            const res = await axios.post(`${REACT_APP_API_URL}/response/create_sheet?formId=${form_id}`);
+            const sheetId = res.data.sheetId;
+            window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, '_blank');
+        } catch (error) {
+            console.error('Failed to create sheet:', error);
+        } finally {
+            setLoadingSheet(false);
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-8">
-            <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-8">
-                
-                <header className="mb-10">
-                    <h1 className="text-5xl font-bold text-gray-900 mb-4">{formName}</h1>
-                    <p className="text-lg text-gray-600">Review all responses for this form</p>
-                    
+        <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-indigo-600 font-sans text-gray-900 p-6">
+            <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+                <header className="mb-10 text-center">
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-800 mb-2">{formName}</h1>
+                    <p className="text-md md:text-lg text-gray-600">Review all responses submitted to this form</p>
                 </header>
 
-                <div className="space-y-10">
+                <div className="space-y-8">
                     {questions.map((question, qIndex) => (
-                        <div key={question.question_id} className="bg-gray-100 rounded-lg shadow-md overflow-hidden">
-                            <div className="bg-purple-700 px-6 py-4">
-                                <h2 className="text-2xl font-semibold text-white">
+                        <div key={question.question_id} className="border border-gray-200 rounded-xl overflow-hidden shadow">
+                            <div className="bg-purple-700 px-5 py-3">
+                                <h2 className="text-xl md:text-2xl font-semibold text-white">
                                     Question {qIndex + 1}: {question.question_text}
                                 </h2>
                             </div>
-                            <div className="p-6">
+                            <div className="p-5 overflow-x-auto">
                                 {question.answers && question.answers.length > 0 ? (
-                                    <table className="min-w-full bg-white rounded-lg shadow-md">
-                                        <thead>
-                                            <tr className="bg-gray-100">
-                                                <th className="py-3 px-6 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Response #</th>
-                                                <th className="py-3 px-6 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">Answer</th>
+                                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                        <thead className="bg-gray-100">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left font-medium text-gray-700">Response #</th>
+                                                <th className="px-4 py-2 text-left font-medium text-gray-700">Answer</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
+                                        <tbody className="divide-y divide-gray-200">
                                             {question.answers.map((answer, aIndex) => (
                                                 <tr key={aIndex}>
-                                                    <td className="py-4 px-6 text-sm font-medium text-gray-900">{aIndex + 1}</td>
-                                                    <td className="py-4 px-6 text-sm text-gray-700">{answer.answer_text}</td>
+                                                    <td className="px-4 py-2 text-gray-800">{aIndex + 1}</td>
+                                                    <td className="px-4 py-2 text-gray-700">{answer.answer_text}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -79,18 +93,28 @@ const Response = () => {
                     ))}
                 </div>
 
-                <div className="mt-12 text-center">
+                <div className="mt-12 flex justify-center gap-6 flex-wrap">
                     <button
                         onClick={() => window.location.href = '/dashboard'}
-                        className="inline-flex items-center px-6 py-3 border border-transparent text-lg font-medium rounded-md text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+                        className="flex items-center gap-2 px-6 py-3 text-lg font-medium text-white bg-purple-700 hover:bg-purple-800 rounded-xl transition-all duration-300"
                     >
-                        <IoArrowBack className="mr-2" />
+                        <IoArrowBack />
                         Back to Dashboard
+                    </button>
+
+                    <button
+                        onClick={handleViewSheet}
+                        disabled={loadingSheet}
+                        className={`px-6 py-3 text-lg font-medium text-white rounded-xl transition-all duration-300 ${
+                            loadingSheet ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+                        }`}
+                    >
+                        {loadingSheet ? 'Creating Sheet...' : 'View in Sheets'}
                     </button>
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default Response;
