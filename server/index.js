@@ -10,6 +10,7 @@ const cors = require("cors");
 const express = require("express");
 const db = require("./utils/db");
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+const { pingDB } = require("./utils/scripts/dbScript");
 
 const app = express();
 app.use(express.json());
