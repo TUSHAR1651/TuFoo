@@ -11,6 +11,7 @@ const jwtKey = process.env.JWT_KEY;
 
 UserRoute.post("/signup", (req, res) => {
     const { email, password } = req.body;
+    const encryptedPassword = bcrypt.hashSync(password, 10);
     
     // console.log(req.body);
     db.query("Select * from users where email = ?", [email], (err, result) => {
@@ -24,7 +25,7 @@ UserRoute.post("/signup", (req, res) => {
             return res.send({ message: "User already exists" });
         }
         else {
-            db.query("INSERT INTO users (email, password) VALUES (?, ?)", [email, password], (err, result) => {
+            db.query("INSERT INTO users (email, password) VALUES (?, ?)", [email, encryptedPassword], (err, result) => {
                 if (err) {
                     // console.log(err);
                     return res.send({ err: err });
@@ -40,13 +41,17 @@ UserRoute.post("/signup", (req, res) => {
 UserRoute.post("/login" , (req , res) => {
     // console.log(req.body);
     const { email, password } = req.body;
-    db.query("SELECT * FROM users WHERE email = ? AND password = ? ", [email, password], (err, result) => {
+    db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
+        console.log(result);
         if (err) {
             res.send({err: err});
         }
         else if (result.length > 0) {
             const id = result[0].id;
-            
+            const isPasswordValid = bcrypt.compareSync(password, result[0].password);
+            if (!isPasswordValid) {
+                return res.send({message: "Wrong email or password"});
+            }
             const token = jwt.sign({id}, jwtKey , {
                 expiresIn: "1d"
             });
