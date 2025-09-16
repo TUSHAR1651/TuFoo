@@ -10,7 +10,7 @@ import Profile from './Profile';
 Modal.setAppElement('#root');
 
 const Dashboard = () => {
-  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
   const navigate = useNavigate();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

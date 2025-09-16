@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import { useState } from 'react';
 const Signup = () => {
-  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [signupSuccess, setSignupSuccess] = useState(false);

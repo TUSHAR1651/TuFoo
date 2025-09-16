@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const ToggleSwitch = ({ onToggle, onLabel = "On", offLabel = "Off", formId }) => {
     const [isOn, setIsOn] = useState(false); 
-    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
     useEffect(() => {
         const fetchFormState = async () => {
             try {

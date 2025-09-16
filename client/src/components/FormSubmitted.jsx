@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

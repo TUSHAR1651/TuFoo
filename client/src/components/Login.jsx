@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { UserContext } from './UserProvider';
 
 const Login = () => {
-    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
     const { setUserId } = useContext(UserContext);
     const navigate = useNavigate();
     const [email, setEmail] = useState('');

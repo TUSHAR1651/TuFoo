@@ -4,7 +4,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const Form = () => {
-  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
   const { formId } = useParams();
   const userId = Cookies.get('userId');
   const navigate = useNavigate();

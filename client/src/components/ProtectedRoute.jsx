@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 
 const ProtectedRoute = () => {
     const token = Cookies.get('token');
-    console.log('Token:', token);  // Logs the token value, helpful for debugging
+    console.log('Token:', token); 
 
     if (!token) {
         console.log("Not logged in - Redirecting to login");

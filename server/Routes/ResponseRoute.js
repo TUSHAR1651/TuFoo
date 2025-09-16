@@ -94,68 +94,52 @@ ResponseRoute.post("/create_sheet", async (req, res) => {
     const sheets = google.sheets({ version: 'v4', auth });
   
     try {
-      const questionMap = new Map(); 
-      dbData.forEach(row => {
-        if (!questionMap.has(row.question_id)) {
-          questionMap.set(row.question_id, row.question_text);
-        }
-      });
-  
-      const questionIds = Array.from(questionMap.keys()); 
-      const questionTexts = Array.from(questionMap.values()); 
-  
-
-      const responseMap = new Map();
-  
-      dbData.forEach(row => {
-        let createdAt = row.answer_created_at;
-        createdAt = createdAt.toISOString();
-        if (!responseMap.has(createdAt)) {
-          responseMap.set(createdAt, new Map());
-        }
-        
-        const userAnswers = responseMap.get(createdAt);
-  
-        if (!userAnswers.has(row.question_id)) {
-          userAnswers.set(row.question_id, []);
-        }
-        userAnswers.get(row.question_id).push(row.answer_text);
-      });
-
       const sheetData = [];
-  
+      const questionSet = new Set();
 
-      sheetData.push([...questionTexts]);
-  
+      dbData.forEach(entry => {
+        questionSet.add(entry.question_text);
+      });
 
-      responseMap.forEach((userAnswers) => {
-        const row = [];
-        for (const qId of questionIds) {
-          const answers = userAnswers.get(qId);
-          if (answers) {
-            row.push(answers.join(", "));
-          } else {
-            row.push("");
-          }
+      const questions = Array.from(questionSet);
+
+      sheetData.push([...questions]);
+
+      const grouped = {};
+      dbData.forEach(entry => {
+        const createdAtRaw = entry.createdAt;
+
+        let createdAt = "";
+        if (createdAtRaw) {
+          const dateObj = new Date(createdAtRaw);
+          createdAt = !isNaN(dateObj) ? dateObj.toISOString().split("T")[0] : String(createdAtRaw);
         }
+
+        if (!grouped[createdAt]) {
+          grouped[createdAt] = {};
+        }
+        grouped[createdAt][entry.question_text] = grouped[createdAt][entry.question_text] ? grouped[createdAt][entry.question_text]+ "," + entry.answer_text : entry.answer_text || "";
+      });
+
+      Object.keys(grouped).forEach(createdAt => {
+        const row = [...questions.map(q => grouped[createdAt][q] || "")];
         sheetData.push(row);
       });
-  
-  
 
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
-        range: 'Sheet1!A1', 
-        valueInputOption: 'RAW',
+        range: "Sheet1!A1",
+        valueInputOption: "RAW",
         requestBody: {
           values: sheetData,
         },
       });
-  
 
     } catch (error) {
-      res.status(500).send({ error: 'Error updating sheet data' });
+      throw new Error("Failed to overwrite sheet data: " + error.message);
     }
+
+
   }
   
   

@@ -6,7 +6,7 @@ import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 import { PlusCircle, MinusCircle, Save, ArrowLeft, Trash2, Edit3 } from 'lucide-react';
 
 const EditForm = () => {
-    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
     const userId = Cookies.get('userId');
     const location = useLocation();
     const navigate = useNavigate();

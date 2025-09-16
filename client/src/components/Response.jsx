@@ -4,7 +4,7 @@ import { IoArrowBack } from 'react-icons/io5';
 import Cookies from 'js-cookie';
 
 const Response = () => {
-    const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+    const REACT_APP_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
     const userId = Cookies.get('userId');
     const form_id = window.location.pathname.split('/')[3];
     const [questions, setQuestions] = useState([]);

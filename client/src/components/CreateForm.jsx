@@ -5,7 +5,7 @@ import Modal from 'react-modal';
 import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa';
 
 const CreateForm = () => {
-    const REACT_API_URL = process.env.REACT_APP_API_URL;
+    const REACT_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
     const [questions, setQuestions] = useState([]);
